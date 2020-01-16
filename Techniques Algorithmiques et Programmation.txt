@@ -1,0 +1,59 @@
+http://dept-info.labri.fr/~gavoille/UE-TAP/
+
+TCHISLA
+
+Tchisla: fc(n) = #c utilisés pour créer le nombre n
+    Pas de formule close, ni algorithme -> Problème indécidable/incalculable
+Algorithme: Résout un problème
+Problème: Relation entre les entrées (instances) et les sorties
+Indécibabilité: Il n'existe pas d'algorithme pour le problème donné
+
+PROBLEMES INDECIDABLES
+
+(x - 1)! + 1 = xy
+x^p + y^p = z^p
+
+Problème de la halte: Est-ce que un programme s'arrête ou boucle indéfiniment? -> indécidable
+
+int halte(void (*f)(void*), int x); // f = pointeur de fonction
+void loop(int x) {
+    if (halte(loop, x)) for (;;);  // ici loop(x) va boucler
+    return;                        // ici loop(x) se termine
+}
+
+RECHERCHE EXHAUSTIVE
+
+Recherche exhaustive = Brute-force
+    Beaucoup trop de cas à évaluer
+
+Tchisla2: fc(n) = #caractères pour créer le nombre n
+    Liste toutes les solutions
+
+int tchisla2(int c, int n) {
+  int T[2*n+3], k = 1;  // n=(c+...+c)/c, k=taille
+  T[0] = 0;             // plus petite expression de taille k=1
+  for (;;k++)           // une condition vide est toujours vraie
+    do if (Eval(T, k, c) == n) return k; // fin si s’évalue à n
+    while (Next(T, k)); // passe à l’expression suivante
+}
+
+RAPPELS SUR LA COMPLEXITE
+
+Complexité != Notations asymptotiques
+Complexité = Mesure appliquée à un algorithme ou un programme et qui s'exprime en fonction de la taille des entrées ou des paramètres
+    Instructions élémentaires (lecture, écriture, calcul sur des mots mémoires)
+Complexité en espace = Nombres de mots mémoires maximum utilisés durant l'exécution de l'algorithme pour toute entrée (pire des cas)
+
+Compte exact impossible
+    Valeur asymptotique du nombre d'instructions est importante
+
+NOTATIONS ASYMPTOTIQUES
+
+On dit que "f(n) est en O(g(n))" ssi ∃n0∈ℕ, ∃c>0, ∀n≧n0, f(n) ≦ c*g(n)
+On dit que "f(n) est en Ω(g(n))" ssi g(n) = O(f(n))
+On dit que "f(n) est en Θ(g(n))" si g(n) = O(f(n)) et g(n) = Ω(g(n))
+
+Un problème a une complexité C(n) s'il existe un algorithme de complexité O(C(n)) qui résout le problème ET tout algorithme qui résout le problème a une complexité Ω(C(n))
+
+ALGORITHME ET LOGARITHME
+

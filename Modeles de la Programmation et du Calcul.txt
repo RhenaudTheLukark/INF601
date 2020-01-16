@@ -1,0 +1,183 @@
+Adrian Tamasa - atanasa@u-bordeaux.fr
+Labri, bat A30, bureau 303
+Cours: https://www.labri.fr/perso/atanasa/MPC
+
+Etude de fondements logiques et mathématiques de l'informatique
+    Théorie d'automates
+    Logique mathématique, combinatoire
+
+Notions clés:
+    Automates finis
+    Expressions rationnelles
+    Grammaires algébriques
+    Automate à pile
+    Eléments de combinatoire
+
+Plan:
+    I   - Langages formels, mots
+    II  - Expressions rationnelles
+    III - Automates finis
+    IV  - Grammaires algébriques
+    V   - Automates à piles
+    VI  - Quelques éléments introductifs de combinatoires
+
+
+
+MOTS ET LANGAGES FORMELS
+
+- Motivation pour l'étude des mots et langages
+
+Toute donnée informatique est (codée par) un mot
+Exemples du codage par les mots:
+    Programme en C, texte
+    Graphe
+
+Mot = Suite de lettres
+Langage formel = Ensemble de mots
+Objectif: Comprendre, définir, manipuler et transformer les langages
+L'alphabet est un ensemble fini
+
+Exemple: A alphabet, A = { 0, 1 }
+Exemple de mots sur A: 01, 001101, Ɛ
+Mot vide = Ɛ
+
+A* = L'ensemble de mots formés sur l'alphabet A
+A* est un monoïde libre
+Le triplet (E, ., Ɛ) est un monoïde logique:
+    - u.v∈E
+    - u.(v.w) = (u.v).w ∀u,v,w∈E
+    - u.Ɛ = Ɛ.u = u
+Une partie P d'un monoïde est appelée base [A COMPLETER]
+Un monoïde est libre s'il admet une base
+
+Le langage vide Ø est le langage qui ne contient aucun mot
+Il ne faut pas confondre le langage vide Ø avec le langage { Ɛ }
+
+Longueur d'un mot = Nombre de lettres
+Ex: |Ɛ| = 0, |010| = 3
+
+Concaténation de mots: consiste à coller deux mots (u.v)
+Ex: (aba).(bab) = ababab, Ɛ.(ab) = ab = (ab).Ɛ
+Le mot vide est l'élément neutre de l'opération de concaténation
+
+
+
+EXPRESSIONS RATIONNELLES (REGULIERES)
+
+Une classe de langages a été définie par Stephen C. Kleene (1909-1994)
+Les langages rationnels (réguliers) sont définis en utilisant les expressions rationnelles (régulières)
+
+Les expressions rationnelles (régulières) sont formelles à partir du mot vide et des lettres en utilisant 3 opérations rationnelles:
+    L'union: L1UL2 := { u | u∈L1 ou u∈L2 } := L1+L2
+        Ex: { a, ab } U { aa } = { a, ab, aa }
+    Le produit (la concaténation): L1.L2 = { u1, u2 | u1∈L1, u2∈L2 }
+        Ex: { a, ab } . { a } = { aa, aba } & { a, ab } . { a } != { a, ab, a }
+    L'étoile: L* := U(i>=0)Li = L0UL1UL2U... où L0 = { Ɛ }, L1 = L, L2 = L.L, L3 = L2.L, ..., Ln = Ln-1.L
+
+Les expressions rationnelles sont construites à partir de lettres, le mot vide Ɛ et l'expression vide Ø en utilisant l'union (+), le produit (.) et l'étoile (*).
+
+L(e) = Langage défini par l'expression e
+Ex: L(a) = { a }, L(Ɛ) = { Ɛ }, L(Ø) = { Ø }
+
+On a:
+    L(e1 + e2) = L(e1) + L(e2)
+    L(e1 . e2) = L(e1) . L(e2)
+    L(e*)      = (L(e))*
+
+Exemples d'expressions rationnelles:
+    Ensemble de mots sur { a, b } qui commencent par la lettre a: a . (a + b)*; a . (a* . b*)*
+    Ensemble de mots sur { a, b } qui contiennent le facteur "aba": (a + b)* aba (a + b)*
+    Ensemble des entiers divisibles par 2 en base 2 (l'alphabet est { 0, 1 }): (0 + 1)* 0
+    Ensemble des entiers divisibles par 5, en base 10 (l'alphabet est { 0, 1, 2..., 9 }): (0 + 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9)* (0 + 5)
+    Ensemble de tous les mots sur A sauf le mot vide Ɛ: A* \ { Ɛ } = A . A* = A* . A
+
+e+ := e . e* = e* . e = e . (Ɛ + e + e² + ...) = e + e² + e³ + ...
+e* := Ɛ + e+
+Au niveau des langages, avec L langage rationnel
+    L+ = L U L² U L³ U...
+    L* = { Ɛ } U L U L² U...
+    Donc L* = { Ɛ } U L+
+
+
+
+AUTOMATES FINIS
+
+Un automate fini (AF) est une machine abstraite très simple qui permet de définir des langages.
+Un AF est une machine qui prend en entrée des mots et émet un "verdict", chaque mot est accepté ou rejeté par l'AF
+Intérêt par rapport aux expressions: l'AF est un graphe (on a beaucoup d'algorithmes sur les graphes!)
+
+Un automate fini est un quintuplet (A, Q, 𝛿, I, F)
+    A - L'alphabet de travail
+    Q - L'ensemble d'états
+    𝛿 - L'ensemble de transitions, 𝛿 ⊆ Q x A x Q
+    I - L'ensemble d'états initiaux, I ⊆ Q
+    F - L'ensemble d'états finaux/acceptants, F ⊆ Q
+
+Une transition peut se représenter de plusieurs façons:
+    - Triplet (Ex: (1, a, 2) avec 1, 2 ∈ Q et a ∈ A)
+    - Couple  (Ex: ((1, a), 2))
+    - Flèche orientée (1 --a-> 2)
+
+M = { A = { a, b }, Q = { 1, 2, 3 }, I = { 1 }, F = { 2 } }
+                  `
+                 /
+---> 1 ---a--> 2 -\
+      `       /  \b
+      a,b    /
+        \   b
+         \ ,
+          3
+
+𝛿 = { (1, a, 2), (2, b, 2), (2, b, 3), (3, a, 1), (3, b, 1) }
+Un AF peut se représenter de façon canonique sans la forme d'un graphe orienté étiqueté
+
+
+Mots et langages acceptés par un AF
+
+Un calcul (ou un run) d'un AF sur un mot a1a2...au (où a1...aU ∈ A) est un chemin formé de transitions consécutives qui part d'un état initial de l'AF
+    1 --a-> 2                 calcul sur le mot "a"
+    1 --a-> 2 --b-> 2 --b-> 2 calcul sur le mot "abb"
+    1 ou 1 --Ɛ-> 1            calcul sur le mot Ɛ
+Un calcul acceptant est un calcul qui termine dans un état final
+Un mot accepté (reconnu) par un AF est un mot pour lequel il existe au moins un calcul acceptant sur ce mot
+    Le mot "abb" est un mot accepté (reconnu) par l'AF M
+    Le mot "aa" n'est pas un mot accepté par l'AF M
+
+
+Automates et matrices d'adjacences de graphes
+
+On peut associer de façon canonique à un automate la matrice d'adjacence du graphe respectif.
+Mots de longueur k reconnus par l'AF
+    Si on part d'un état i∈Q et on arrive dans un état j∈Q, M^k(ij)
+
+Le langage accepté/reconnu par un automate H est l'ensemble des mots acceptés par l'automate H
+    Notation: L(H) est le langage accepté par l'automate H
+        L(M) = a(b + b(a + b)a)*
+        Remarque: Il existe des algorithmes qui permettent d'exprimer à l'aide d'une expressions rationnelle le langage accepté par un AF
+
+
+Construction d'automates
+
+Exercice: Construire un AF qui permet de reconnaître les langages suivants sur l'alphabet A = { a, b }
+1) L'ensemble des mots commençant par "a"
+2) L'ensemble des mots contenant "aba"
+3) L'ensemble des mots qui contient un nombre pair de "a"
+4) L'ensemble des mots qui ne contient ni "aa" ni "bb"
+
+1) M1 = { A = { a, b }, Q = { 1, 2 }, I = { 1 }, F = { 2 } }
+   𝛿 = { (1, a, 2), (2, (a,b), 2) }
+2) M2 = { A = { a, b }, Q = { 1, 2, 3, 4 }, I = { 1 }, F = { 4 } }
+   𝛿 = { (1, (a,b), 1), (1, a, 2), (2, b, 3), (3, a, 4), (4, (a,b), 4) }
+3) M3 = { A = { a, b }, Q = { 1, 2 }, I = { 1 }, F = { 1 } }
+   𝛿 = { (1, a, 2), (1, b, 1), (2, b, 2), (2, a, 1) }
+4) M4 = { A = { a, b }, Q = { 1, 2 }, I = { 1, 2 }, F = { 1, 2 } }
+   𝛿 = { (1, a, 2), (2, b, 1) }
+
+Automate sur l'alphabet à 10 lettres A = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 } qui reconnaît les nombres divisibles par 5
+M4 = { A = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }, Q = { 1, 2 }, I = { 1 }, F = { 2 } }
+𝛿 = { (1, (0,1,2,3,4,5,6,7,8,9), 1), (1, (0,5), 2) }
+
+
+Automate complet
+
+Un AF H = (A, Q, 𝛿, I, F) est un automate complet si pour chaque état q∈Q et pour chaque lettre a∈A, il existe au moins une transition étiquetée par "a" sortant de l'état q.
