@@ -5,7 +5,7 @@ Bienvenue dans ce dépôt! Mon but est de rassembler les différentes notes que 
 **ATTENTION!** Comme ce répertoire est public, certaines obligations doivent être respectées:
 
 * Il est impossible d'ajouter un fichier donné par un professeur dans ce répertoire à cause des droits d'auteurs, donc veuillez y réferrer en utilisant des liens.
-* Seuls les cours et possiblement les corrections de TDs et exams peuvent être partagés! Si par exemple un élève partage son progrès sur un projet noté en cours, les élèves qui réutilisent ce code et l'élève qui a posté ce code peuvent être accusés de partae de code, ce qui conduit à un 0 pour tout le monde.
+* Seuls les cours et possiblement les corrections de TDs et exams peuvent être partagés! Si par exemple un élève partage son progrès sur un projet noté en cours, les élèves qui réutilisent ce code et l'élève qui a posté ce code peuvent être accusés de partage de code, ce qui conduit à un 0 pour tout le monde.
 
 ## Est-ce que le dépôt sera mis à jour régulièrement?
 
