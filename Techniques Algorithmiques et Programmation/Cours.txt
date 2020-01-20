@@ -1,17 +1,23 @@
 http://dept-info.labri.fr/~gavoille/UE-TAP/
 
+
+
+I - INTRODUCTION
+
+
 TCHISLA
 
 Tchisla: fc(n) = #c utilisés pour créer le nombre n
     Pas de formule close, ni algorithme -> Problème indécidable/incalculable
-Algorithme: Résout un problème
-Problème: Relation entre les entrées (instances) et les sorties
-Indécibabilité: Il n'existe pas d'algorithme pour le problème donné
+* Algorithme: Résout un problème
+* Problème: Relation entre les entrées (instances) et les sorties
+* Indécibabilité: Il n'existe pas d'algorithme pour le problème donné
+
 
 PROBLEMES INDECIDABLES
 
 (x - 1)! + 1 = xy
-x^p + y^p = z^p
+x ^ p + y ^ p = z ^ p
 
 Problème de la halte: Est-ce que un programme s'arrête ou boucle indéfiniment? -> indécidable
 
@@ -20,6 +26,7 @@ void loop(int x) {
     if (halte(loop, x)) for (;;);  // ici loop(x) va boucler
     return;                        // ici loop(x) se termine
 }
+
 
 RECHERCHE EXHAUSTIVE
 
@@ -37,23 +44,207 @@ int tchisla2(int c, int n) {
     while (Next(T, k)); // passe à l’expression suivante
 }
 
+
 RAPPELS SUR LA COMPLEXITE
 
 Complexité != Notations asymptotiques
-Complexité = Mesure appliquée à un algorithme ou un programme et qui s'exprime en fonction de la taille des entrées ou des paramètres
+* Complexité = Mesure appliquée à un algorithme ou un programme et qui s'exprime en fonction de la taille des entrées ou des paramètres
     Instructions élémentaires (lecture, écriture, calcul sur des mots mémoires)
-Complexité en espace = Nombres de mots mémoires maximum utilisés durant l'exécution de l'algorithme pour toute entrée (pire des cas)
+* Complexité en espace = Nombres de mots mémoires maximum utilisés durant l'exécution de l'algorithme pour toute entrée (pire des cas)
 
 Compte exact impossible
     Valeur asymptotique du nombre d'instructions est importante
 
+
 NOTATIONS ASYMPTOTIQUES
 
-On dit que "f(n) est en O(g(n))" ssi ∃n0∈ℕ, ∃c>0, ∀n≧n0, f(n) ≦ c*g(n)
-On dit que "f(n) est en Ω(g(n))" ssi g(n) = O(f(n))
-On dit que "f(n) est en Θ(g(n))" si g(n) = O(f(n)) et g(n) = Ω(g(n))
+* On dit que "f(n) est en O(g(n))" ssi ∃n0∈ℕ, ∃c>0, ∀n≧n0, f(n) ≦ c*g(n)
+* On dit que "f(n) est en Ω(g(n))" ssi g(n) = O(f(n))
+* On dit que "f(n) est en Θ(g(n))" si g(n) = O(f(n)) et g(n) = Ω(g(n))
 
-Un problème a une complexité C(n) s'il existe un algorithme de complexité O(C(n)) qui résout le problème ET tout algorithme qui résout le problème a une complexité Ω(C(n))
+* Un problème a une complexité C(n) s'il existe un algorithme de complexité O(C(n)) qui résout le problème ET tout algorithme qui résout le problème a une complexité Ω(C(n))
+
 
 ALGORITHME ET LOGARITHME
 
+n = e ^ x   x = ln(n)
+n = e ^ 2   int f(int n) {
+                int p = 1;
+                while (n > 1) n /= ++p;
+                return n;
+            }
+--> Complexité en temps? p?
+p = Θ(log n / log log n)
+
+* Le logarithme en base b>1 d'un nombre n>0 noté logb(n), est la puissance à laquelle il faut élever la base b pour obtenir n: n = b ^ (logb(n))
+    n = b ^ x --> x = logb(n)
+    Réciproque de b ^ x
+    logb(n) croit très lentement
+
+n = 10000 = 10 ^ 4 --> 4 = log10(n)
+    log10(n) c'est la longueur de n (nombre de chiffres pour écrire n en base b)
+
+* Le nombre ⌈logb(n)⌉ est le nombre de chiffres pour écrire n-1 en base b.
+    ⌈...⌉ = Partie entière supérieure
+* logb(n) = loga(n) / loga(b)
+    Ex: log2(n) = log10(n) / log10(2) = loge(n) / loge(2) = ln(n) / ln(2) = Θ(log n)
+* logb(x * y) = logb(x) + logb(y)
+* logb(x ^ α) = α * logb(x)
+
+
+
+II - PARTITION D'UN ENTIER
+
+
+LE PROBLEME
+
+Partitionner un ensemble d'éléments indistingables
+
+Paquet de 4 billes: combien de façons de faire des paquets de billes?
+    1 paquet de 4 billes
+    1 paquet de 3 billes + 1 paquet de 1 bille
+    2 paquets de 2 billes
+    1 paquet de 2 billes + 2 paquets de 1 bille
+    4 paquets de 1 billes
+        5 façons de positionner un ensemble de 5 billes
+
+p(n) = Nombre de façons de positionner n (en parts non nulles)
+n    | 1 | 2 | 3 | 4 | 5 | 6  | 7  | ...
+-----+---+---+---+---+---+----+----+-----
+p(n) | 1 | 2 | 3 | 5 | 7 | 11 | 15 | ...
+
+n>0, entier --> calculer p(n)
+    Formule close?
+        Fibonacci: f(n) = f(n-1) + f(n-2), f(n) = ⌈(Φ ^ n) / √5⌋ (arrondi à l'entier le plus proche)
+        On pense qu'il n'y a pas de formule close pour ce problème!
+    Formule asymptotique (Hardy - Romanujan 1918)
+        p(n) ~ (1 / 4n√3) e ^ (π√(2n / 3)) ≈ e ^ (3.7√n) = e ^ (Θ(√n))
+    Algorithme exhaustif
+        O|O O|O|O O = O O|O O|O|O = 2 + 2 + 1 + 1 (Même cas, nombre binaire différent)
+         1 0 1 1 0     0 1 0 1 1
+
+* On dit que f(n) est asymtotiquement équivalent à g(n) (f(n) ~ g(n)) si lim (n --> +∞) (f(n) / g(n)) --> 1
+
+
+RECURRENCE
+
+On représente les partitions par des diagrammes (de Ferrers)
+Ex: n = 12
+
+■
+■      ∞
+■ ■    ^          ■ ■
+■ ■ ■  |          ■ ■ ■ ■ ■
+■ ■ ■ ■|■         ■ ■ ■ ■ ■
+5 3 2 1 1 = 12    3 3 2 2 2 = 12
+
+p(n, k) = Nombre de partitions de n qui ont k parts
+p(n) = p(n, 1) + p(n, 2) + p(n, 3) + ... p(n, n - 1) + p(n, n) = ∑(n)(k = 1) p(n, k)
+
+Deux types de partitions
+    - Partition contenant 1 comme plus petite part
+    - Partition ayant comme plus petite part une valeur >1
+
+p(type1)(n, k) = p(n-1, k-1)
+p(type2)(n, k) = p(n-k, k)
+p(n, k) = p(type1)(n, k) + p(type2)(n, k) = p(n-1, k-1) + p(n-k, k) si 1 < k < n, avec p(n, 1) = 1 et p(n, n) = 1
+
+int p(int n, int k) {
+    if (k == 1 || k == n) return 1;
+    return p(n-1, k-1) + p(n-k, k);
+}
+
+int partition(int n) {
+    int s = 0, k;
+    for (int k = 1; k <= n; k ++) s += p(n, k);
+    return s;
+}
+
+
+ARBRE DES APPELS D'UNE FONCTION
+
+* Arbre dont les noeuds représentent les paramètres d'appels et les fils des différents appels lancés par la fonction
+L'exécution de la fonction correspond à un parcours en profondeur de l'arbre depuis la racine
+
+Arbre des appels pour p(6, 3) avec n = 6, k = 3:
+
+                (6,3)                                 _________partition(6)________
+               /     \                               /     /     /     \     \     \
+              /       \                          (6,1) (6,2) (6,3)     (6,4) (6,5) (6,6)
+         (5,2)         (3,3)
+        /     \          |
+       /       \         1
+  (4,1)         (3,2)
+    |          /     \
+    1         /       \
+         (2,1)         (1,2)
+           |             |
+           1             0
+
+Complexité en temps
+    Proportionnelle au nombre d'appels de p(n, k)
+    Proportionnelle au nombre de noeuds de l'arbre des appels
+    L'arbre est binaire: nombre de noeuds = 2f - 1 où f = nombre de feuilles
+    Au moins la moitié des feuilles ont une valeur de retour "1"
+    Or p(n) ~ e ^ (Θ(√n)) = 1 + 1 + ... + 1 (moitié des feuilles)
+    Donc la complexité est e ^ (Θ(√n))
+
+La complexité est en e ^ (Θ(√n)) = 2 ^ (Θ(log2(e) * √n)) = 2 ^ (Θ(√n))
+Cela ne veut pas dire que la complexité de la fonction partition(n) est exponentielle
+Un nombre p(n) pour un nombre de N chiffres alors la complexité (de notre algorithme) est 2 ^ (Θ(√n)), n = 2 ^ N --> 2 ^ (Θ(√(2 ^ N))) = 2 ^ (Θ(2 ^ (N/2)))
+
+Calculs inutiles
+    L'arbre des appels peut servir à détecter les calculs inutiles
+
+                ( n , k )
+               /         \
+              /           \
+     (n-1,k-1)             (n - k, k)
+    /         \           /          \
+   /           \         /            \
+...     (n-k,k-1)       (n-k-1,k-1)    ...
+       /         \     /           \
+      /           \   /             \
+   ...    (n-2k,k-1) (n-k-2,k-2)     ...
+         /         / \          \
+        /         /   \          \
+  (n-2k,k-2)   ...     ...   (n-2k,k-2)
+
+
+PROGRAMMATION DYNAMIQUE
+
+Pour améliorer une version récursive d'un algorithme, on utilise une table auxiliaire pour mémoriser les calculs déjà effectués
+Pour p(n, k) -> p[n][k]
+
+  | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
+--+---+---+---+---+---+---+---+---+---+
+n | 1 | X | X | X | X | X | X | X | X |
+--+---+---+---+---+---+---+---+---+---+
+1 | 1 | 1 | X | X | X | X | X | X | X |
+--+---+---+---+---+---+---+---+---+---+
+2 | 1 | 1 | 1 | X | X | X | X | X | X |
+--+---+---+---+---+---+---+---+---+---+
+3 | 1 | 2 | 2 | 1 | X | X | X | X | X |
+--+---+---+---+---+---+---+---+---+---+
+4 | 1 | 2 | 2 | 2 | 1 | X | X | X | X |
+--+---+---+---+---+---+---+---+---+---+
+5 | 1 | 3 | 3 | 2 | 1 | 1 | X | X | X |
+--+---+---+---+---+---+---+---+---+---+
+6 | 1 |...|...|...|...|...| 1 | X | X |
+--+---+---+---+---+---+---+---+---+---+
+7 | 1 |...|...|...|...|...|...| 1 | X |
+--+---+---+---+---+---+---+---+---+---+
+8 | 1 |...|...|...|...|...|...|...| 1 |
+
+int partition(int n) {
+    int P[n+1][n+1], s = 0;
+    for (int i = 1; i <= n; i++) {
+        P[i][1] = P[i][i] = 1;
+        for (int k = 2; k < i; k++)
+            P[i][k] = P[i-1][k-1] + P[i-k][k];
+    }
+    for (int k = 1; k <= n; k++) s+= P[n][k];
+    return s;
+}
+
+Complexité: O(n²) soit O(2 ^ (2N)) si N = nombre de chiffres
