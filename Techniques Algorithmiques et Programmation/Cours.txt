@@ -216,25 +216,25 @@ PROGRAMMATION DYNAMIQUE
 Pour améliorer une version récursive d'un algorithme, on utilise une table auxiliaire pour mémoriser les calculs déjà effectués
 Pour p(n, k) -> p[n][k]
 
-  | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
+nk| 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
 --+---+---+---+---+---+---+---+---+---+
-n | 1 | X | X | X | X | X | X | X | X |
+1 | 1 | X | X | X | X | X | X | X | X |
 --+---+---+---+---+---+---+---+---+---+
-1 | 1 | 1 | X | X | X | X | X | X | X |
+2 | 1 | 1 | X | X | X | X | X | X | X |
 --+---+---+---+---+---+---+---+---+---+
-2 | 1 | 1 | 1 | X | X | X | X | X | X |
+3 | 1 | 1 | 1 | X | X | X | X | X | X |
 --+---+---+---+---+---+---+---+---+---+
-3 | 1 | 2 | 2 | 1 | X | X | X | X | X |
+4 | 1 | 2 | 2 | 1 | X | X | X | X | X |
 --+---+---+---+---+---+---+---+---+---+
-4 | 1 | 2 | 2 | 2 | 1 | X | X | X | X |
+5 | 1 | 2 | 2 | 2 | 1 | X | X | X | X |
 --+---+---+---+---+---+---+---+---+---+
-5 | 1 | 3 | 3 | 2 | 1 | 1 | X | X | X |
+6 | 1 | 3 | 3 | 2 | 1 | 1 | X | X | X |
 --+---+---+---+---+---+---+---+---+---+
-6 | 1 |...|...|...|...|...| 1 | X | X |
+7 | 1 |...|...|...|...|...| 1 | X | X |
 --+---+---+---+---+---+---+---+---+---+
-7 | 1 |...|...|...|...|...|...| 1 | X |
+8 | 1 |...|...|...|...|...|...| 1 | X |
 --+---+---+---+---+---+---+---+---+---+
-8 | 1 |...|...|...|...|...|...|...| 1 |
+9 | 1 |...|...|...|...|...|...|...| 1 |
 
 int partition(int n) {
     int P[n+1][n+1], s = 0;
@@ -248,3 +248,116 @@ int partition(int n) {
 }
 
 Complexité: O(n²) soit O(2 ^ (2N)) si N = nombre de chiffres
+
+MEMORISATION PARESSEUSE
+
+Cas de Fibonacci:
+
+int fibo(int n) {
+    if (n < 2) return n;
+    return fibo(n - 1) + fibo(n + 2);
+}
+
+fibo: 2 ^ Θ(n) car répétitions fréquentes
+
+int F[] = { [0..99] = -1 };
+int fibo_mem(int n) {
+    if (n < 2) return n;
+    if (F[n] < 0) F[n] = fibo_mem(n - 1) + fibo_mem(n - 2);
+    return F[n];
+}
+
+fibo_mem: Θ(n) car aucune répétition, 2n - 1 noeuds visités au total
+
+int f(int n) {
+    if (n < 2) return n;
+    int u = f(n - 1);
+    return u + f(u % n);
+}
+--> Boucle for difficile car f(10) = f(9) + f(4)
+
+Exemple plus complexe
+    Si plusieurs paramètres f(a, b, c), (a, b, c) ∈ Table?
+        Oui: return Table[(a, b, c)]
+        Non: v = f(a, b, c) = f(a - b, c, b) * f(a - 1, b - 1, c - 1)
+             Ajouter (a, b, c) et v à la table: Table[(a, b, c)] = v
+
+
+
+III - LE VOYAGEUR DE COMMERCE
+
+Problème: Voyageur de commerce (TSP = Traveler Salesman Problem)
+Instance: Un ensemble V de points et une distance d sur V.
+Question: Trouver une tournée de longueur minimum passant par tous les points de V, i.e. un ordre v0, v1...vn-1 des points de V tel que ∑(n-1)(i=0)(d(v1, v((i+1)%n))) soit minimale.
+
+
+INEGALITE TRIANGULAIRE
+
+d(A, C) ≤ d(A, B) + d(B, C)
+
+TSP métrique
+TSP asymètrique
+TSP graphique (suit les arêtes d'un arc)
+
+
+APPROCHE EXHAUSTIVE
+
+On souhaite trouver un ordre -> tournée
+On souhaite minimiser la longueur de la tournée
+
+Principe: Générer tous les ordres possibles, calculer la longueur de chacune des tournées et prendre la plus courte
+
+Complexité?
+Ordre: 0, 1, 2, 3...n-1
+       0, 1, 2, 3...n-1, n-2
+       ...
+       n-1, n-2...2, 1, 0
+-> n!
+Θ(n) pour calculer la longueur d'une tournée
+    Θ(n * n!) ≈ (n / e) ^ n
+        Si n = 20, n * n! > 10 ^ 18
+
+
+PROGRAMMATION DYNAMIQUE (HELD-KANP 1962)
+
+Observation:
+
+v1 S1 v2 S2 v3 S3 v4 S4 v5
+    2  x  2  x  2  x  2  = 16
+
+Choix de différents points entre des points définis, réduction de choix possibles
+
+
+VARIABLE
+
+On suppose qu'on commence la tournée en vn-1
+On pose V* = V \ { vn-1 } = { v0, v1...vn-2 }
+    !!! Ce n'est pas l'ordre final de la tournée!
+∀S⊆V*, t∈S, D(t, S) = La longueur minimale d'un chemin allant de vn-1 à t∈S et qui visite tous (et seulement) les points de S
+
+Notons OPT(V, d) la longueur optimale pour (V, d)
+Alors, OPT(V, d) = min(t∈V*){ D(t, V*) + d(t, vn-1) }
+
+
+FORMULE DE RECURRENCE
+
+D(t, S):
+    d(vn-1, t) si |S| = 1
+    min(x ∈ S \ { t }){ D(x, S \ { t }) + d(x, t) }
+
+
+IMPLEMENTATION RECURSIVE
+
+double Drec(int t, set S) {
+    if (set_card(S) == 1) return d(V[n-1], V[t]);
+    double w = DBL_MAX; // w = +∞
+    set T = set_minus(S, t); // T = S \ { t }
+    for (int x = 0; x < n-1; x++)
+        if (set_in(x, T)) w = fmin(w, Drec(x, T) + d(V[x], V[t]));
+    set_free(T);
+    return w;
+}
+-> Complexité est toujours factorielle avec calculs inutiles, donc peu efficace
+
+
+MEMORISATION
