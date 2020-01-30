@@ -68,11 +68,11 @@ Une classe de langages a été définie par Stephen C. Kleene (1909-1994)
 Les langages rationnels (réguliers) sont définis en utilisant les expressions rationnelles (régulières)
 
 Les expressions rationnelles (régulières) sont formelles à partir du mot vide et des lettres en utilisant 3 opérations rationnelles:
-    L'union: L1UL2 := { u | u∈L1 ou u∈L2 } := L1+L2
-        Ex: { a, ab } U { aa } = { a, ab, aa }
+    L'union: L1 ∪ L2 := { U | u∈L1 ou u∈L2 } := L1+L2
+        Ex: { a, ab } ∪ { aa } = { a, ab, aa }
     Le produit (la concaténation): L1.L2 = { u1, u2 | u1∈L1, u2∈L2 }
         Ex: { a, ab } . { a } = { aa, aba } & { a, ab } . { a } != { a, ab, a }
-    L'étoile: L* := U(i>=0)Li = L0UL1UL2U... où L0 = { Ɛ }, L1 = L, L2 = L.L, L3 = L2.L, ..., Ln = Ln-1.L
+    L'étoile: L* := U(i>=0)Li = L0 ∪ L1 ∪ L2 ∪... où L0 = { Ɛ }, L1 = L, L2 = L.L, L3 = L2.L, ..., Ln = Ln-1.L
 
 Les expressions rationnelles sont construites à partir de lettres, le mot vide Ɛ et l'expression vide Ø en utilisant l'union (+), le produit (.) et l'étoile (*).
 
@@ -94,9 +94,9 @@ Exemples d'expressions rationnelles:
 e+ := e . e* = e* . e = e . (Ɛ + e + e² + ...) = e + e² + e³ + ...
 e* := Ɛ + e+
 Au niveau des langages, avec L langage rationnel
-    L+ = L U L² U L³ U...
-    L* = { Ɛ } U L U L² U...
-    Donc L* = { Ɛ } U L+
+    L+ = L ∪ L² ∪ L³ ∪...
+    L* = { Ɛ } ∪ L ∪ L² ∪...
+    Donc L* = { Ɛ } ∪ L+
 
 
 
@@ -114,7 +114,7 @@ Un automate fini est un quintuplet (A, Q, 𝛿, I, F)
     F - L'ensemble d'états finaux/acceptants, F ⊆ Q
 
 Une transition peut se représenter de plusieurs façons:
-    - Triplet (Ex: (1, a, 2) avec 1, 2 ∈ Q et a ∈ A)
+    - Triplet (Ex: (1, a, 2) avec 1, 2∈Q et a∈A)
     - Couple  (Ex: ((1, a), 2))
     - Flèche orientée (1 --a-> 2)
 
@@ -134,7 +134,7 @@ Un AF peut se représenter de façon canonique sans la forme d'un graphe orient�
 
 Mots et langages acceptés par un AF
 
-Un calcul (ou un run) d'un AF sur un mot a1a2...au (où a1...aU ∈ A) est un chemin formé de transitions consécutives qui part d'un état initial de l'AF
+Un calcul (ou un run) d'un AF sur un mot a1a2...au (où a1...au ∈ A) est un chemin formé de transitions consécutives qui part d'un état initial de l'AF
     1 --a-> 2                 calcul sur le mot "a"
     1 --a-> 2 --b-> 2 --b-> 2 calcul sur le mot "abb"
     1 ou 1 --Ɛ-> 1            calcul sur le mot Ɛ
@@ -178,6 +178,76 @@ M4 = { A = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }, Q = { 1, 2 }, I = { 1 }, F = { 2 } 
 𝛿 = { (1, (0,1,2,3,4,5,6,7,8,9), 1), (1, (0,5), 2) }
 
 
-Automate complet
 
-Un AF H = (A, Q, 𝛿, I, F) est un automate complet si pour chaque état q∈Q et pour chaque lettre a∈A, il existe au moins une transition étiquetée par "a" sortant de l'état q.
+AUTOMATE COMPLET
+
+Définition: Un AF H = (A, Q, I, F, 𝛿) est un automate complet si pour chaque état q∈Q et pour chaque lettre a∈A, il existe au moins une transition étiquetée par a sortant de l'état q
+
+
+Construction d'un automate complet (le complété)
+
+Théorème: Si H = (A, Q, I, F, 𝛿) et soit J = (A, Q ∪ { q1 }, I, F, 𝛿') où:
+    q1 est un nouveau état (état puit?)
+    Les transitions de J sont données par 𝛿' = 𝛿 ∪ { (p, α, q1) } p∈Q, α∈A et il n'y a pas de transition de la forme (p, α, q) dans H [A completer...?]
+L'AF J est un automate complet et L(H) = L(J)
+J est le complété de H
+
+Preuve: Immédiate, car les transitions rajoutées ne modifient pas les chemins associés aux mots reconnus
+
+
+
+AUTOMATES DETERMINISTES
+
+Définition: L'automate H = (A, Q, I, F, 𝛿) est un AF déterministe (ou AFD) si:
+    |I| = 1 (il existe un seul état initial)
+    Pour tout p∈Q et toute α∈A, il existe au plus une transition étiquetée α qui soit de l'état p.
+
+
+Le complémentaire
+
+Définition: Le complémentaire (ou le complément) d'un ensemble de mots L ⊆ A* est l'ensemble A* \ L (l'ensemble de mots qui ne sont pas dans L)
+
+Théorème: Soit H = (A, Q, I, F, 𝛿) un automate complet et déterministe. Soit J = (A, Q, I, Q \ F, 𝛿) (J est obtenu à partir de H en rendant finaux les états non-finaux de H)
+Alors, L(J) = A* \ L(H)
+
+Exemple: H = { A = { a }, Q = { 1, 2 }, I = { 1 }, F = { 2 }, 𝛿 = { (1, a, 2), (2, a, 2) } } - L(H) = aa* = a+
+         J = { A = { a }, Q = { 1, 2 }, I = { 1 }, F = { 1 }, 𝛿 = { (1, a, 2), (2, a, 2) } } - L(J) = { Ɛ } = A* \ L(H)
+
+Remarque: Si A n'est pas complet et déterministe, le théorème n'est pas vrai
+
+Exemples:
+    Automate complet mais pas déterministe:
+        H = { A = { a, b }, Q = { 1, 2 }, I = { 1 }, F = { 2 }, 𝛿 = { (1, (a,b), 1), (1, a, 2), (2, (a,b), 2) } } - L(H) = (a + b)* a (a + b*)
+        J = { A = { a, b }, Q = { 1, 2 }, I = { 1 }, F = { 1 }, 𝛿 = { (1, (a,b), 1), (1, a, 2), (2, (a,b), 2) } } - L(J) = (a + b)* = A* ≠ A* \ L(H)
+    Automate déterministe mais pas complet:
+        H = { A = { a }, Q = { 1, 2 }, I = { 1 }, F = { 2 }, 𝛿 = { (1, a, 2) } - L(H) = a
+        J = { A = { a }, Q = { 1, 2 }, I = { 1 }, F = { 1 }, 𝛿 = { (1, a, 2) } - L(J) = { Ɛ } ≠ A* \ L(H)
+
+Remarque: Il ne faut pas confondre complémenter et compléter
+
+
+
+DETERMINISATION DES AUTOMATES
+
+Objectif: A partir d'un AF non-déterministe H, construire un automate déterministe J tel que L(A) = L(B)
+
+
+Résultat préliminaire - ensemble de sous-ensembles
+
+Soit Q un ensemble fini, |Q| = n. On note 2^Q l'ensemble de sous-ensembles de Q. Alors |2^Q| = 2^n
+Q = { q1, q2,... qn }  2^Q = { ∅, { q1 }, { q2 }, ..., { qn }, { q1, q2 }, { q1, q3 }, ..., { qn-1, qn }, ..., { q1, q2, ..., qn } }
+Si n = 3, 2^Q = { ∅, { q1 }, { q2 }, { q3 }, { q1, q2 }, { q1, q3 }, { q2, q3 }, { q1, q2, q3 } }
+|2^Q| = 2^3 = 8
+
+Preuve: |2^Q| = (n 0) + (n 1) + ... (n n) = 2^n où (n k) = (n!) / (k!(n-k)!)
+
+
+La méthode de sous-ensembles
+
+Soit H = (A, Q, I, F, 𝛿) un AF non-déterministe
+On construit l'automate pour lequel:
+    l'ensemble d'états est 2^Q
+    l'état initial est { I }
+    un état P∈2^Q est final si et seulement si P ∩ F ≠ ∅
+    la fonction de transition est donnée par 𝛿J(P, a) = U(p∈P) 𝛿(p, a) ∀P∈2^Q, a∈A
+Théorème: L'AF construit ainsi est un AFD qui reconnait le même langage que A
