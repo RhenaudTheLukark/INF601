@@ -1,1 +1,174 @@
-Compilation
+lionel.clement@u-bordeaux.fr
+https://dept-info.labri.fr/ENSEIGNEMENT/compilation/
+
+
+Bibliographie:
+    Alfred Aho, Ravi Sethi, et Jeffrey Ullman. Compilateurs: principes, techniques et outils. InterEditions, 1989. Dunod, 2000. (tr. de Compilers: Principles, Techniques, and Tools, Addison-Wesley, 1986)
+    Andrew Appel. Modern compiler implementation in Java. Cambridge University Press, 2002.
+
+Objectif final: Savoir écrire un compilateur
+
+NOTICE: L'ABUS DE JAVA PEUT ENTRAINER COLERE, VOMISSEMENTS, CECITE, BOURDONNEMENTS, DECADENCE, ENVIES DE MEURTRE ET MORT SOUDAINE. VEUILLEZ EN PARLER AVEC VOTRE DEVELOPPEUR TRAITANT.
+
+
+
+COMPILATEUR
+
+Logiciel qui traduit d'un langage source à un langage cible => Traducteur
+Un compilateur doit identifier, dans l'ordre:
+    (Les macros, les include, ...         => Preprocessor) (autre logiciel)
+    Analyse lexicale                      => Tokenization
+    Analyse syntaxique                    => Parsing
+    Analyse sémantique (typage, symboles)
+    Code intermédiaire (UNIVERSEL)
+    Optimisation (boucles, mémoire)
+    Génération de code
+
+Contexte du compilateur: Source => Prétraiteur => Compilateur (=> Objet) => Assembleur => Lieur (=> OUT) => Chargeur
+
+Les phases et le resultat peuvent être différents d’un compilateur à un autre:
+    Interprétation immédiate plutôt que compilation proprement dite: Postscript, Shell, HTML
+    Production de code portable (bytecode) pour une machine virtuelle, et de code dédié à une machine en particulier: P-code, java, NET
+    Langages sources plus ou moins structurés. L’assembleur par exemple est très peu structuré, alors que le langage Java l'est assez.
+    Optimisation du code plus ou moins poussée
+    Analyse et correction éventuelle des erreurs plus ou moins poussée
+
+Exemple: PGCD en C
+
+int PGCD(int a, int b) {
+    while (b != a) {
+        if (a > b) a = a − b;
+        else {
+            /∗ Echanger a et b ∗/
+            int tmp;
+            tmp = a;
+            a = b;
+            b = tmp;
+        }
+        return a;
+    }
+}
+
+
+1 - Analyze lexicale
+
+Repérage des commentaires, mots réservés (keywords), identificateurs
+
+Transformation du code de PGCD:
+KEYWORD(int) IDENTIF(PGCD) LPAR KEYWORD(int) IDENTIF(a) COMMA KEYWORD(int) IDENTIF(b) RPAR LCURVE KEYWORD(while) LPAR IDENTIF(b) DIFF IDENTIF(a) RPAR LCURVE KEYWORD(if) LPAR IDENTIF(a) GT IDENTIF(b) RPAR IDENTIF(a) AFF IDENTIF(a) MINUS IDENTIF(b) SEMI KEYWORD(else) LCURVE COMMENT KEYWORD(int) IDENTIF(tmp) SEMI IDENTIF(tmp) AFF IDENTIF(a) SEMI IDENTIF(a) AFF IDENTIF(b) SEMI IDENTIF(b) AFF IDENTIF(tmp) SEMI RCURVE KEYWORD(return) IDENTIF(a) SEMI RCURVE
+
+
+2 - Analyze syntaxique
+
+[VOIR ARBRE A CE LIEN: https://dept-info.labri.fr/ENSEIGNEMENT/compilation/cours/cours.pdf]
+
+
+3 - Analyze de types
+
+PGCD: int x int -> int
+a: int
+b: int
+tmp: int
+
+
+4 - Code assembleur
+
+WHILE1:
+SET R1 DIFF a b
+JUMP−IF R1 WHILE3
+JUMP WHILE4
+WHILE3:
+JUMP−IF GT a b IF1
+JUMP IF2
+IF1:
+MINUS R2 A B
+SET A R2
+JUMP IF3
+IF2:
+SET TMP A
+SET A B
+SET B TMP
+IF3:
+JUMP WHILE1
+WHILE4:
+RETURN A
+
+
+
+ANALYSE LEXICALE - JFLEX
+
+
+Rappels de MPC:
+    Monoïde libre sur ∑
+        ∑ alphabet (ensemble fini de lettres)
+        . opérateur de concaténation
+        Ɛ élément neutre => a . Ɛ = Ɛ . a = a
+        Monoïde libre ∑*: ensemble des séquences sur ∑
+        Ɛ ∈ ∑*
+        si a ∈ ∑, a ∈ ∑*
+        X ∈ ∑*, Y ∈ ∑*, X ∈ ∑* => XY ∈ ∑*
+
+    Langage sur ∑
+        Toute partie de ∑*
+
+    Ecriture qui permet de décrire un langage rationnel
+
+  Forme  |                   Sens
+---------+------------------------------------------
+    Ɛ    |               σ(Ɛ) = { Ɛ }
+    a    |           σ(a) = { a }, a ∈ ∑
+   R S   | σ(RS) = { xy ∈ ∑* / x ∈ σ(R), y ∈ σ(S) }
+  R + S  |          σ(R + S) = σ(R) ∪ σ(S)
+   R *   |        σ(R*) = R0 ∪ R1 ∪ R2 ∪ ...
+
+* = Etoile de Kleene
+
+R = (0 + 1 + 2 + 3 + ... + 9) (0 + 1 + ... + 9)*
+σ(R) = {0, 1, 2, ..., 9, 01, 02, ..., 258, .., ∞ }
+
+
+Sucre syntaxique
+
+R+ = RR∗
+R? = (R + Ɛ)
+R{ i, j } = Ri + Ri+1 + ··· + Rj où σ(Rn) = RR...R (R n fois)
+R{ i, }   = Ri + Ri+1 + ···
+R{ , j }  = ... + Rj-1 + Rj
+
+.        Caractère sauf \n
+[^]      Caractère Unicode sauf les newline
+[liste]  Caractère contenu dans la liste, peut contenir des intervalles noté a-z
+[^liste] Caractère non contenu dans la liste
+
+^R  Mot reconnu par R en début de ligne
+R$  Mot reconnu par R juste avant \n ou en fin de fichier
+R/S Mot reconnu par R qui précède un mot reconnu par S
+
+[:jletter:]      Un caractère qui peut être la première lettre d’un identificateur Java
+[:jletterdigit:] Un caractère qui peut être une partie d’un identificateur Java
+[:letter:]       Une lettre
+[:digit:]        Un chiffre
+[:uppercase:]    Un caractère capitale
+[:lowercase:]    Un caractère bas de casse
+\d               Un chiffre
+\D               Tout caractère qui n’est pas un chiffre
+\s               Un espace (tabulation, espace, etc.)
+\S               Tout caractère qui n’est pas un espace
+\w               Chiffre, lettre, symboles de ponctuation
+\W               Tout caractère sauf \w
+
+!R               Complémentaire de R (doit être exceptionnellement utilisé)
+~R               Toute chaine qui se termine par la première occurrence du texte dénoté par R
+                 Par exemple "/*"~"*/" reconnait les commentaires du langage C
+
+
+Grammaire régulière, automate à nombre fini d'états (FSM = Finite State Machine)
+
+Rappels de MPC, /ENCORE/:
+    FSM:
+        Etats
+        Etat initial
+        Etats finaux
+        Transitions
+
+A toute Regex correspond un FSM
