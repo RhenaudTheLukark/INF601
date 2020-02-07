@@ -172,3 +172,68 @@ Rappels de MPC, /ENCORE/:
         Transitions
 
 A toute Regex correspond un FSM
+Cela permet de construire un automate qui reconnait le langage dénoté par une expression régulière
+
+JFlex ne permet pas d'anamyser la syntaxe d'un code
+
+
+
+ANALYSE SYNTAXIQUE
+
+JFlex ne fait que traduire des expressions régulières en automates à nombre finis d'états et y associe du code Java
+Il n'est pas concu pour réaliser un analyseur syntaxique qui reconnait un langage qui ne serait pas rationnel
+
+
+Grammaires algébriques et langage algébrique (Context Free Grammar, CFG)
+
+Soit la grammaire G = (∑, N, R, S) où
+    ∑ = { PLUS, MINUS, TIMES, DIV, LPAR, RPAR, NUMBER }
+    N = { E, E', T, T', F }
+    S = E
+    R = {
+        E  -> E E'
+        E' -> PLUS T
+        E' -> MINUS T
+        E  -> T
+        T  -> T T'
+        T' -> TIMES F
+        T' -> DIV F
+        T  -> F
+        F  -> LPAR F'
+        F' -> E RPAR
+        F  -> NUMBER
+    }
+
+G = (∑, N, R, S) avec
+    ∑ = { nb, +, -, /, *, (, ) }
+    N = { E, T, F }
+    S = E
+    R = {
+        E -> E + T
+        E -> E - T
+        E -> T
+        T -> T x F
+        T -> T / F
+        T -> F
+        T -> F
+        F -> (E)
+        F -> nb
+    }
+
+
+Analyse Cocke-Younger-Kasami
+
+Algorithme CYK créé en 1967
+Tabulaire => Traite le non-déterminisme par une analyse parallèle des différentes alternatives
+L4algorithme original s'applique à des grammaires normales de Chomky qui sont des grammaires indépendantes du contexte où la partie droite de chaque règle est composée d'au plus deux symboles
+Le principe de l'algorithme consiste à remplacer les termes deux-à-deux à chaque fois qu'une règle de la grammaire le permet, jusqu'au symbole initial
+Autrement dit, on part des mots pour les remplacer progressivement par des termes en appliquant les règles de la grammaire
+Pour cela on utilise un tableau où les colonnes correspondent au nombre de lettres analysées de gauche à droite et où les lignes correspondent aux nombre de lettres rassemblées
+
+Chaque cellule T[i,j] correspond à l'empan aiai+1...ak analysé
+L'algorithme consiste au remplissage du tableau
+En voici une méthode: Soit a1a2...ak
+    Remplir la première ligne du tableau avec a1, a2...ak
+    De la première à la ke ligne, remplir chaque cellule avec le terme A
+        S'il existe le terme δ dans cette cellule et que la règle A -> δ existe
+        S'il existe une règle A -> αβ, avec α∈[i,k] et β∈[i+k,j-k] pour tout k de 1 à j
