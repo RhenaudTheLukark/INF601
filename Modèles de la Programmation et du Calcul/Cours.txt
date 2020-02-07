@@ -244,10 +244,65 @@ Preuve: |2^Q| = (n 0) + (n 1) + ... (n n) = 2^n où (n k) = (n!) / (k!(n-k)!)
 
 La méthode de sous-ensembles
 
-Soit H = (A, Q, I, F, 𝛿) un AF non-déterministe
+Théorème: Soit H = (A, Q, I, F, 𝛿) un AF non-déterministe
 On construit l'automate pour lequel:
     l'ensemble d'états est 2^Q
     l'état initial est { I }
     un état P∈2^Q est final si et seulement si P ∩ F ≠ ∅
-    la fonction de transition est donnée par 𝛿J(P, a) = U(p∈P) 𝛿(p, a) ∀P∈2^Q, a∈A
+    la fonction de transition est donnée par 𝛿J(P, a) = U(p∈P) 𝛿(p, a), ∀P∈2^Q, a∈A
 Théorème: L'AF construit ainsi est un AFD qui reconnait le même langage que A
+
+Exemple: H = { A = { a, b }, Q = { p, q, r }, I = { p }, F = { r }, 𝛿 = { (p, (a,b), p), (p, a, q), (q, b, r), (r, (a,b), r) } }
+    Q = { p, q, r }
+    Les sous-ensembles de Q QJ = { ∅, { p }, { q }, { r }, { p, q }, { p, r }, { q, r }, { p, q, r } }
+    IJ = { p }
+    FJ = { { r }, { p, r }, { q, r }, { p, q, r } }
+    𝛿J({ p }, a) = 𝛿H(p, a) = { p, q }
+    𝛿J({ p }, b) = 𝛿H(p, b) = { p }
+    𝛿J({ q }, a) = 𝛿H(q, a) = ∅
+    𝛿J({ q }, b) = 𝛿H(q, b) = { r }
+    𝛿J({ r }, a) = 𝛿H(r, a) = { r }
+    𝛿J({ r }, b) = 𝛿H(r, b) = { r }
+    𝛿J({ p, q }, a) = 𝛿H(p, a) U 𝛿H(q, a) = { p, q } U ∅    = { p, q }
+    𝛿J({ p, q }, b) = 𝛿H(p, b) U 𝛿H(q, b) = { p } U { r }    = { p, r }
+    𝛿J({ q, r }, a) = 𝛿H(q, a) U 𝛿H(r, a) = ∅ U { r }       = { r }
+    𝛿J({ q, r }, b) = 𝛿H(q, b) U 𝛿H(r, b) = { r } U { r }    = { r }
+    𝛿J({ p, r }, a) = 𝛿H(p, a) U 𝛿H(r, a) = { p, q } U { r } = { p, q, r }
+    𝛿J({ p, r }, b) = 𝛿H(p, b) U 𝛿H(r, b) = { p } U { r }    = { p, r }
+    𝛿J({ p, q, r }, a) = 𝛿H(p, a) U 𝛿H(q, a) U 𝛿H(r, a) = { p, q } U ∅ U { r } = { p, q, r }
+    𝛿J({ p, q, r }, b) = 𝛿H(p, b) U 𝛿H(q, b) U 𝛿H(r, b) = { p } U { r } U { r } = { p, r }
+    [VOIR SCHEMA]
+
+Preuve: L'AF J est déterministe et complet par construction.
+    Ré-écriture de transitions dans J
+    P, R⊂Q, a∈A on a P--a->R lorsque R = { q∈Q | ∃p∈P, (p, a, q)∈𝛿H }
+
+Lemme: Pour tout mot w et pour tout état r∈Q, il existe un chemin q--w->r dans H avec q∈I
+    si et seulement s'il existe un chemin I--w->R dans J, avec r∈R
+    L(H) = L(J) <=> L(H)⊆L(J) et L(J)⊆L(H) (tout mot de L(H) est tout mot de L(J))
+    Soit w∈L(H), il existe un chemin acceptant dans H sur w, c'est à dire ∃q∈I et r∈F tel que q--w->r dans H
+
+D'après le lemme, il existe un chemin I--w->R dans J, avec r∈R mais r∈F => R∩F≠∅ => R état final de J
+    => I--w->R est un chemin acceptant
+    => w∈L(J), ∀w
+    => L(H)⊆L(J)
+    => L(J)⊆L(H)
+
+Soit w∈L(J)
+    => Il existe un chemin acceptant dans J sur w
+    C'est à dire ∃ I--w->R dans J, R état final
+        => ∃r∈F tel que r∈R (car R∩F≠∅)
+
+D'après le lemme, il existe un calcul q--w->r dans H, avec q∈I
+    => w∈L(H), ∀w
+    => L(J)⊆L(H)
+    => L(H) = L(J)
+
+
+Propriétés de clotures des AF
+
+Définition: Un langage reconnaissable est un langage pour lequel il existe un AF qui reconnaît ce langage
+
+Théorème: Soit A un alphabet
+    - Si L ⊆ A* est un langage reconnaissable alors son complémentaire A*\L est aussi reconnaissable
+    - Si L1 et L2 sont des langages reconnaissables, alors les langages L1∪L2 et L1∩L2 sont aussi reconnaissables
