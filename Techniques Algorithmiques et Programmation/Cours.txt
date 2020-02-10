@@ -359,5 +359,54 @@ double Drec(int t, set S) {
 }
 -> Complexité est toujours factorielle avec calculs inutiles, donc peu efficace
 
+Récurrence
+    D(t, S) = Longueur d'un chemin de vn-1 à t et qui passe par tous les sommets de S
+    S ⊆ { v0, v1...vn-2 } (V*)
+    t∈S
+
+OPT(V, d) = min(t∈V*){ D(t, V*) + d(t, vn-1) }
+D(t, S) = | d(vn-1, t)                                    si |S| = 1
+          | min(x∈S \ { t }){ D(x, S \ { t }) + d(x, t) } si |S| > 1
+
+double D_rec(int t, set S) {  // calcul récursif de D(t, S)
+    if (set_card(S) == 1) return d(V[n-1], V[t]); // si|S| = 1
+    double w = DBL_MAX;           // w = +∞
+    set T = set_minus(S, t);      // crée T = S \ { t }
+    for (int x = 0; x < n-1; x++) // pour tout x∈S:
+    if (set_in(x, T))             // si x∈T
+        w = fmin(w, D_rec(x, T) + d(V[x], V[t])); // minx(D(x, T) + d(x, t))
+    set_free(T);
+    return w;
+}
+-> Complexité toujours factorielle
+
+Nombre d'appels (t, S) différents: (n-1) * 2^(n-1)
+
 
 MEMORISATION
+
+D(t, S) -> D[t][S]
+
+On représente S par un mote binaire vi∈S <=> le ieme bit est à 1
+
+ \ S|    0001   |    0010   |0011|....|1111|
+  \ |     v0    |     v1    |v0v1|....| V* |
+t  \|     1     |     2     |  3 |....| 15 |
+----+-----------+-----------+----+----+----+
+v0  |D(v0, {v0})|           |    |    |    |
+----+-----------+-----------+----+----+----+
+v1  |           |D(v1, {v1})|    |    |    |
+----+-----------+-----------+----+----+----+
+... |           |           |    |    |    |
+----+-----------+-----------+----+----+----+
+vn-1|           |           |    |    |    |
+
+Complexité en espace: La table a (n-1) * 2^(n-1) cases, donc la complexité est de O(n * 2^n)
+Complexité en temps:  n(n-1) * 2^(n-1) de l'ordre de O(n² * 2^n)
+
+
+APPROXIMATION
+
+n >>> 100?
+Utiliser d'autres algorithmes qui ne donnent pas la valeur optimale
+    Ex: Le point le plus proche
