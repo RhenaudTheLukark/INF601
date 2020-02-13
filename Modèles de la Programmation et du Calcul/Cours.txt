@@ -306,3 +306,83 @@ Définition: Un langage reconnaissable est un langage pour lequel il existe un A
 Théorème: Soit A un alphabet
     - Si L ⊆ A* est un langage reconnaissable alors son complémentaire A*\L est aussi reconnaissable
     - Si L1 et L2 sont des langages reconnaissables, alors les langages L1∪L2 et L1∩L2 sont aussi reconnaissables
+
+Soit Hi = (A, Qi, Ii, Fi, 𝛿i) avec i = 1,2, Q = Q1 x Q2, I = I1 x I2,
+F∪ = { (q1, q2)∈Q | q1∈F1 ou q2∈F2 }
+F∩ = { (q1, q2)∈Q | q1∈F1 et q2∈F2 } = F1 x F2
+𝛿 = { ((p1, p2), a, (q1, q2))∈Q x A x Q | (pi, a, qi)∈𝛿i, i = 1,2 }
+
+Théorème - Produit cartésien d'AF
+    - L'AF H∩ = (A, Q, I, F∩, 𝛿) reconnait l'intersection des langages reconnus par H1 et H2
+    - Si H1 et H2 sont complets, l'AF H∪ = (A, Q, I, F∪, 𝛿) reconnait l'union des langages reconnus par H1 et H2
+
+Preuve:
+    1) L(H1)∩L(H2) = L(H∩) <=> L(H1)∩L(H2) ⊆ L(H∩) et L(H∩) ⊆ L(H1)∩L(H2)
+        1) L(H1)∩L(H2) ⊆ L(H∩)
+            Soit w = a1a2...an∈L(H1)∩L(H2)
+            => ∃p0--a1->p1--a2->...--an->pn calcul acceptant dans H1
+               ∃q0--a1->q1--a2->...--an->qn calcul acceptant dans H2
+            => (p0, q0)--a1->(p1, q1)--a2->...--an->(pn, qn) calcul dans H∩
+               p0∈I1, q0∈I2 => (p0, q0)∈I
+               pn∈F1, qn∈F2 => (pn, qn)∈F∩
+            => w∈L(A∩) => L(H1)∩L(H2) ⊆ L(H∩)
+        2) L(H∩) ⊆ L(H1)∩L(H2)
+            Soit w = a1a2...an∈L(H∩)
+            => ∃(p0, q0)--a1->(p1, q1)--a2->...--an->(pn, qn) calcul acceptant dans H∩
+            => (p0, q0)∈I  => p0∈I1, q0∈I2
+               (pn, qn)∈F∩ => pn∈F1, qn∈F2
+               p0--a1->p1--a2->...--an->pn calcul dans H1
+               q0--a1->q1--a2->...--an->qn calcul dans H2
+            => w∈L(H1)∩L(H2) => L(H∩) ⊆ L(H1)∩L(H2)
+        => L(H1)∩L(H2) = L(H∩)
+    2) L(H1)∪L(H2) = L(A∪) <=> L(H1)∪L(H2) ⊆ L(H∪) et L(H∪) ⊆ L(H1)∪L(H2)
+        1) L(H1)∪L(H2) ⊆ L(H∪)
+            Soit w = a1a2...an∈L(H1)∪L(H2) => w reconnu par H1, soit par H2
+            On suppose (sans perte de généralité) que w∈L(H1)
+            => ∃p0--a1->p1--a2->...--an->pn calcul acceptant dans H1
+               p0∈I1, pn∈F1
+            H2 est complet: ∃q0--a1->q1--a2->...--an->qn calcul dans H2 avec q0∈I2
+            => (p0, q0)--a1->(p1, q1)--a2->...--an->(pn, qn) calcul dans H∪
+            (p0, q0)∈I, (pn, qn)∈F∪
+            => w∈L(H∪) => L(H1)∪L(H2) ⊆ L(H∪)
+        2) Identique au cas 1.2
+
+Exemple de produit cartésien d'AF (VOIR FIG. 1)
+    H1: { A = { a, b }, Q = { q1, q2, q3 }, I = { q1 }, F = { q3 }, 𝛿 = { (q1, (a,b), q1), (q1, b, q2), (q2, a, q3), (q3, (a,b), q3) } }
+    H2: { A = { a, b }, Q = { q4, q5, q6 }, I = { q4 }, F = { q6 }, 𝛿 = { (q4, (a,b), q4), (q4, a, q5), (q5, b, q6), (q6, (a,b), q6) } }
+
+    Trouver le produit cartésien de H1 et H2, afin d'avoir un AF qui reconnait L(H1)∩L(H2)
+
+    H∩ = {
+        A = { a, b }, I = { (q1, q4) }, F∩ = { (q3, q6) },
+        Q = { (q1, q4), (q1, q5), (q1, q6), (q2, q4), (q2, q5), (q2, q6), (q3, q4), (q3, q5), (q3, q6) },
+        𝛿 = {
+            ((q1, q4), (a,b), (q1, q4)), // 14 -> 14
+            ((q1, q6), (a,b), (q1, q6)), // 16 -> 16
+            ((q3, q4), (a,b), (q3, q4)), // 34 -> 34
+            ((q3, q6), (a,b), (q3, q6)), // 36 -> 36
+
+            ((q1, q4), a,     (q1, q5)), // 14 -> 15
+            ((q1, q5), b,     (q1, q6)), // 15 -> 16
+            ((q1, q5), b,     (q2, q6)), // 15 -> 26
+            ((q1, q6), b,     (q2, q6)), // 16 -> 26
+            ((q2, q6), a,     (q3, q6)), // 26 -> 36
+
+            ((q1, q4), b,     (q2, q4)), // 14 -> 24
+            ((q2, q4), a,     (q3, q4)), // 24 -> 34
+            ((q2, q4), a,     (q3, q5)), // 24 -> 35
+            ((q3, q4), a,     (q3, q5)), // 34 -> 35
+            ((q3, q5), b,     (q3, q6))  // 35 -> 36
+        }
+    }
+
+AF avec Ɛ-transitions
+    Identiques aux AF, mais il peut aussi y avoir des transitions sur le mot vide Ɛ
+
+Exemple
+    H = { A = { a, b }, Q = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, I = { 1 }, F = { 9 }, 𝛿 = { (1, Ɛ, 2), (1, Ɛ, 8), (2, Ɛ, 3), (2, Ɛ, 5), (3, a, 4), (4, Ɛ, 7), (5, b, 6), (6, Ɛ, 7), (7, Ɛ, 2), (7, Ɛ, 8), (8, a, 9) } }
+    L(H) - L'ensemble des mots finissant par "a"
+
+Théorème de Kleene
+    On peut convertir d'une manière algorithmique une expression rationnelle en AF qui reconnait le même langage
+    Vice-versa, on peut convertir de manière algorithmique un AF en expression rationnelle qui décrit le langage reconnu par l'AF
