@@ -237,3 +237,92 @@ En voici une méthode: Soit a1a2...ak
     De la première à la ke ligne, remplir chaque cellule avec le terme A
         S'il existe le terme δ dans cette cellule et que la règle A -> δ existe
         S'il existe une règle A -> αβ, avec α∈[i,k] et β∈[i+k,j-k] pour tout k de 1 à j
+
+
+Extension de l'analyseur CYK à toute grammaire CFG
+
+On remarquera qu'un pas de l'algorithme consiste à appliquer une règle A[i,j] -> X[i,k] Y[k,j], où [i,k], [k,j] et [i, j] sont des intervalles de [A COMPLETER]
+
+
+Complexité
+
+La complexité de l'algorithme CYK par rapport à la longueur n de la chaine d'entrée est la suivante:
+    Il y a O(n²) cellules
+    Le remplissage de chaque cellule [i,j] avec A se fait à l'aide de la règle
+    A[i,j] -> X1[i,k1] X2[k1,k2] X3[k2,k3]...Xk[kn,j]
+    qui met en jeu k-1 indices pour régler la taille de chaque empan [kα,kβ]
+    Comme il y a n(n-1)/2 cellules, la complexité est O(n² * n^(k-1)), c'est à dire O(n^(k+1)) où k est la longueur maximum d'une partie droite des règles [A COMPLETER]
+
+Je laisse tomber, ce prof reste pas sur ses putains de cours
+
+
+Reformulation de CYK
+
+L'algorithme peut se reformuler sous la forme de trois règles d'interférence de type
+ premisse
+ --------
+conclusion
+
+1- Axiom:
+
+    RIEN
+------------ ∃A -> α∈R
+(A -> .α,i,i)
+
+2- Shift:
+
+ (A -> α.αβ,i,j)
+----------------- α = αj
+(A -> αa.β,i,j+1)
+
+3- Reduce:
+
+(A -> α.Bβ,i,j) (B -> δ.,j,k)
+-----------------------------
+       (A -> αB.β,i,k)
+
+L'item (A -> α.β,i,j) représente un état de l'analyseur syntaxique tel que
+    A -> αβ est une règle de la grammaire (α et β sont des séquences éventuellement vides de symboles et de lettres)
+    La posiiton de . représente le fait que α a été analysé mais pas encore β
+    [i,j] est l'intervalle des lettres qui couvrent α (α => αi...αj)
+    La règle 1 Axiom permet d'amorcer la reconnaissance de A sans aucune contrainte (on fait systématiquement l'hypothèse que A sera analysé pour toute règle A -> δ)
+    La règle 2 Shift complète l'analyse de δ par la lecture d'une lettre
+    La règle 3 Reduce complète l'analyse de δ à l'aide d'un terme déjà reconnu
+L'idée de cette reformulation est de créer la binarisation des règles de la grammaire CFG pour obtenir un algorithme dont la complexité en temps est O(n^3)
+
+
+Analyse Earley
+
+Soit G une grammaire CFG (Z, N, R, S)
+Amorce ------------- ∃S -> α
+       (S -> .α,0,0)
+
+Cloture (A -> α.Bβ,i,j)
+        --------------- ∃B -> δ
+         (B -> .δ,j,j)
+
+Décalage  (A -> α.aβ,i,j)
+         ----------------- α = jeme lettre
+         (B -> αa.β,i,j+1)
+
+Réduction (A -> α.Bβ,i,j) (B -> δ.,j,k)
+          -----------------------------
+                 (A -> αB.β,i,k)
+
+
+Algorithme de reconnaissance Earley
+    Initialiser avec I0 = { (S' -> .S,0,0) }
+    répéter pour i allant de 1 à k
+        Pour tout (A -> α.aiβ,n,i-1) qui appartient à Ii-1
+            Ajouter (A ->αai.β,n,i) à Ii
+        Appliquer les règles 1 et 2 sur Ii tant qu'elles ajoutent un item
+    Si Ik contient l'item (S' -> S.0,k) alors la chaine a1...ak est reconnue, sinon elle ne l'est pas
+
+Algorithme d'analyse Earley
+    On ajoute à chaque item une liste de règles
+    Un item se note à présent (A -> α.β,i,j,(μ1μ2μ3...μk)) où μn est une règle et l'on peut déduire de μ1μ2μ3...μk une dérivation droite
+    Initialiser avec I0 = { (S' -> .S,0,0,()) }, et faire en tous points comme dans l'algorithme de reconnaissance
+    Si l'item (S' -> .S,0,k,(μ1μ2...)) appartient à Ik, cela signifie que la chaine a1...ak est analysée et que la liste (μ1μ2...) correspond à une dérivation droite
+
+    Soit un item (A -> α.aiβ,n,i-1,Φ) dans Ij, s'il existe une règle B -> r, alors l'item (B -> .r,j,j,()) est ajouté à Ij
+    Soit une séquence a1...am...ai...aj...ak. Si un item (A -> α.,i,j,Ψ) [A COMPLETER]
