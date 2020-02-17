@@ -1,0 +1,406 @@
+#+TITLE: Compilation
+#+AUTHOR: (Collaboratif)
+#+EMAIL: lionel.clement@u-bordeaux.fr
+#+STARTUP: indent latexpreview
+#+LATEX_HEADER: \usepackage{amsmath}
+#+LATEX_HEADER: \usepackage{amssymb}
+#+LATEX_HEADER: \usepackage{mathrsfs}
+#+LATEX_HEADER: \usepackage{algorithm}
+#+LATEX_HEADER: \usepackage{algorithmic}
+
+* Introduction
+
+  https://dept-info.labri.fr/ENSEIGNEMENT/compilation/
+
+
+Bibliographie: Alfred Aho, Ravi Sethi, et Jeffrey
+    Ullman. Compilateurs: principes, techniques et
+    outils. InterEditions, 1989. Dunod, 2000. (tr. de Compilers:
+    Principles, Techniques, and Tools, Addison-Wesley, 1986) Andrew
+    Appel. Modern compiler implementation in Java. Cambridge
+    University Press, 2002.
+
+Objectif final: Savoir écrire un compilateur
+
+NOTICE: L'ABUS DE JAVA PEUT ENTRAINER COLERE, VOMISSEMENTS, CECITE,
+BOURDONNEMENTS, DECADENCE, ENVIES DE MEURTRE ET MORT
+SOUDAINE. VEUILLEZ EN PARLER AVEC VOTRE DEVELOPPEUR TRAITANT.
+
+
+* COMPILATEUR
+
+Logiciel qui traduit d'un langage source à un langage cible => Traducteur
+Un compilateur doit identifier, dans l'ordre:
+- (Les macros, les include, ... => Preprocessor) (autre logiciel)
+- Analyse lexicale              => Tokenization
+- Analyse syntaxique            => Parsing
+- Analyse sémantique (typage, symboles)
+- Code intermédiaire (UNIVERSEL)
+- Optimisation (boucles, mémoire)
+- Génération de code
+
+Contexte du compilateur: Source => Prétraiteur => Compilateur (=>
+Objet) => Assembleur => Lieur (=> OUT) => Chargeur
+
+Les phases et le resultat peuvent être différents d’un compilateur à
+un autre: Interprétation immédiate plutôt que compilation proprement
+dite: Postscript, Shell, HTML Production de code portable (bytecode)
+pour une machine virtuelle, et de code dédié à une machine en
+particulier: P-code, java, NET Langages sources plus ou moins
+structurés. L’assembleur par exemple est très peu structuré, alors que
+le langage Java l'est assez.  Optimisation du code plus ou moins
+poussée Analyse et correction éventuelle des erreurs plus ou moins
+poussée
+
+Exemple: PGCD en C
+
+#+BEGIN_SRC C
+int PGCD(int a, int b) {
+    while (b != a) {
+        if (a > b) a = a − b;
+        else {
+            /∗ Echanger a et b ∗/
+            int tmp;
+            tmp = a;
+            a = b;
+            b = tmp;
+        }
+        return a;
+    }
+}
+#+END_SRC
+
+
+** Analyze lexicale
+
+Repérage des commentaires, mots réservés (keywords), identificateurs
+
+Transformation du code de PGCD:
+
+KEYWORD(int) IDENTIF(PGCD) LPAR KEYWORD(int) IDENTIF(a) COMMA
+KEYWORD(int) IDENTIF(b) RPAR LCURVE KEYWORD(while) LPAR IDENTIF(b)
+DIFF IDENTIF(a) RPAR LCURVE KEYWORD(if) LPAR IDENTIF(a) GT IDENTIF(b)
+RPAR IDENTIF(a) AFF IDENTIF(a) MINUS IDENTIF(b) SEMI KEYWORD(else)
+LCURVE COMMENT KEYWORD(int) IDENTIF(tmp) SEMI IDENTIF(tmp) AFF
+IDENTIF(a) SEMI IDENTIF(a) AFF IDENTIF(b) SEMI IDENTIF(b) AFF
+IDENTIF(tmp) SEMI RCURVE KEYWORD(return) IDENTIF(a) SEMI RCURVE
+
+
+** Analyze syntaxique
+
+VOIR ARBRE A CE LIEN:
+[[https://dept-info.labri.fr/ENSEIGNEMENT/compilation/cours/cours.pdf]]
+
+
+** Analyze de types
+
+\[PGCD: int x int \to int\]
+\[a: int\]
+\[b: int\]
+\[tmp: int\]
+
+
+** Code assembleur
+
+#+BEGIN_EXAMPLE
+  WHILE1:
+  SET R1 DIFF a b
+  JUMP−IF R1 WHILE3
+  JUMP WHILE4
+  WHILE3:
+  JUMP−IF GT a b IF1
+  JUMP IF2
+  IF1:
+  MINUS R2 A B
+  SET A R2
+  JUMP IF3
+  IF2:
+  SET TMP A
+  SET A B
+  SET B TMP
+  IF3:
+  JUMP WHILE1
+  WHILE4:
+  RETURN A
+#+END_EXAMPLE
+
+
+* ANALYSE LEXICALE - JFLEX
+
+** Rappels de MPC:
+
+Monoïde libre sur \Sigma
+ - \Sigma alphabet (ensemble fini de lettres)
+ - =.= opérateur de concaténation
+ - \varepsilon élément neutre => a . \varepsilon = \varepsilon . a = a
+
+Monoïde libre \Sigma*: ensemble des séquences sur \Sigma
+ - \varepsilon \in \Sigma*
+ - si a \in \Sigma, a \in \Sigma*
+   + X \in \Sigma*, Y \in \Sigma*, X \in \Sigma* => XY \in \Sigma*
+
+Langage sur \Sigma
+Toute partie de \Sigma*
+
+Ecriture qui permet de décrire un langage rationnel
+
+| Forme       | Sens                                                                   |
+|-------------+------------------------------------------------------------------------|
+| \varepsilon | \(\sigma(\varepsilon) = { \varepsilon }\)                              |
+| a           | \(\sigma(a) = { a }, a \in \Sigma\)                                    |
+| R S         | \(\sigma(RS) = { xy \in \Sigma* / x \in \sigma(R), y \in \sigma(S) }\) |
+| R + S       | \(\sigma(R + S) = (R) ∪  \sigma(S)\)                                   |
+| R *         | \(\sigma(R*) = R0 ∪ R1 ∪ R2 ∪ \ldots \)                                |
+
+\(* = Etoile de Kleene\)
+
+
+\[R = (0 + 1 + 2 + 3 + \ldots + 9) (0 + 1 + \ldots + 9)*\]
+
+\[\sigma(R) = {0, 1, 2, \ldots, 9, 01, 02, \ldots, 258, .., \infty }\]
+
+
+Sucre syntaxique
+
+
+\[R+ = RR∗\]
+\[R? = (R + \varepsilon)\]
+\[R{ i, j } = Ri + Ri+1 + ··· + Rj où \sigma(Rn) = RR \ldots R\]
+\[R{ i, }   = Ri + Ri+1 + ···\]
+\[R{ , j }  =  \ldots  + Rj-1 + Rj\]
+
+
+| Regex              | Description                                                                   |
+|--------------------+-------------------------------------------------------------------------------|
+| =.=                | Caractère sauf \n                                                             |
+| =[^]=              | Caractère Unicode sauf les newline                                            |
+| =[liste]=          | Caractère contenu dans la liste, peut contenir des intervalles noté a-z       |
+| =[^liste]=         | Caractère non contenu dans la liste                                           |
+| =^R=               | Mot reconnu par R en début de ligne                                           |
+| =R$=               | Mot reconnu par R juste avant \n ou en fin de fichier                         |
+| =R/S=              | Mot reconnu par R qui précède un mot reconnu par S                            |
+| =[:jletter:]=      | Un caractère qui peut être la première lettre d’un identificateur Java        |
+| =[:jletterdigit:]= | Un caractère qui peut être une partie d’un identificateur Java                |
+| =[:letter:]=       | Une lettre                                                                    |
+| =[:digit:]=        | Un chiffre                                                                    |
+| =[:uppercase:]=    | Un caractère capitale                                                         |
+| =[:lowercase:]=    | Un caractère bas de casse                                                     |
+| =\d=               | Un chiffre                                                                    |
+| =\s=               | Un espace (tabulation, espace, etc.)                                          |
+| =\S=               | Tout caractère qui n’est pas un espace                                        |
+| =\w=               | Chiffre, lettre, symboles de ponctuation                                      |
+| =\W=               | Tout caractère sauf \w                                                        |
+| =!R=               | Complémentaire de R (doit être exceptionnellement utilisé)                    |
+| =~R=               | Toute chaine qui se termine par la première occurrence du texte dénoté par R. |
+|                    | Par exemple "/*"~"*/" reconnait les commentaires du langage C                 |
+
+
+
+Grammaire régulière, automate à nombre fini d'états (FSM = Finite
+State Machine)
+
+- Rappels de MPC, /ENCORE/:
+  + FSM:
+    * Etats
+    * Etat initial
+    * Etats finaux
+    * Transitions
+
+A toute Regex correspond un FSM. Cela permet de construire un automate
+qui reconnait le langage dénoté par une expression régulière.
+
+JFlex ne permet pas d'analyser la syntaxe d'un code.
+
+
+* ANALYSE SYNTAXIQUE
+
+JFlex ne fait que traduire des expressions régulières en automates à
+nombre finis d'états et y associe du code Java Il n'est pas concu pour
+réaliser un analyseur syntaxique qui reconnait un langage qui ne
+serait pas rationnel
+
+
+Grammaires algébriques et langage algébrique (Context Free Grammar,
+CFG)
+
+Soit la grammaire $G = (\Sigma, N, R, S)$ où
+#+BEGIN_EXAMPLE
+Sigma = { PLUS, MINUS, TIMES, DIV, LPAR, RPAR, NUMBER }
+N = { E, E', T, T', F }
+S = E
+R = {
+      E  -> E E'
+      E' -> PLUS T
+      E' -> MINUS T
+      E  -> T
+      T  -> T T'
+      T' -> TIMES F
+      T' -> DIV F
+      T  -> F
+      F  -> LPAR F'
+      F' -> E RPAR
+      F  -> NUMBER
+    }
+#+END_EXAMPLE
+
+et \(G = (\Sigma, N, R, S)\) avec
+#+BEGIN_EXAMPLE
+Sigma = { nb, +, -, /, *, (, ) }
+N = { E, T, F }
+S = E
+R = {
+      E -> E + T
+      E -> E - T
+      E -> T
+      T -> T x F
+      T -> T / F
+      T -> F
+      T -> F
+      F -> (E)
+      F -> nb
+}
+#+END_EXAMPLE
+
+
+** Analyse Cocke-Younger-Kasami
+
+Algorithme CYK créé en 1967.  Tabulaire => Traite le non-déterminisme
+par une analyse parallèle des différentes alternatives.  L'algorithme
+original s'applique à des grammaires normales de Chomsky qui sont des
+grammaires indépendantes du contexte où la partie droite de chaque
+règle est composée d'au plus deux symboles.  Le principe de
+l'algorithme consiste à remplacer les termes deux-à-deux à chaque fois
+qu'une règle de la grammaire le permet, jusqu'au symbole initial.
+Autrement dit, on part des mots pour les remplacer progressivement par
+des termes en appliquant les règles de la grammaire.  Pour cela on
+utilise un tableau où les colonnes correspondent au nombre de lettres
+analysées de gauche à droite et où les lignes correspondent aux nombre
+de lettres rassemblées.
+
+Chaque cellule T[i,j] correspond à l'empan \(aiai+1 \ldots ak\) analysé.
+L'algorithme consiste au remplissage du tableau.
+
+En voici une méthode:
+ - Soit \(a1.a2 . \ldots . ak\).
+   + Remplir la première ligne du tableau avec \(a1, a2 \ldots ak\)
+   + De la première à la ke ligne, remplir chaque cellule avec le
+     terme A
+     * S'il existe le terme  \delta  dans cette cellule et que la règle A \to
+        \delta  existe
+     *  S'il existe une règle A \to \alpha \beta, avec \alpha \in [i,k]
+        et \beta \in [i+k,j-k] pour tout k de 1 à j
+
+*** Extension de l'analyseur CYK à toute grammaire CFG
+
+On remarquera qu'un pas de l'algorithme consiste à appliquer une règle
+\(A[i,j] \to X[i,k] Y[k,j]\), où \([i,k]\), \([k,j]\) et \([i, j]\)
+sont des intervalles de /[A COMPLETER]/
+
+
+**** Complexité
+
+La complexité de l'algorithme CYK par rapport à la longueur n de la
+chaine d'entrée est la suivante:
+ - Il y a \(O(n^2)\) cellules
+ - Le remplissage de chaque cellule [i,j] avec A se fait à l'aide de
+   la règle \(A[i,j] \to X1[i,k1] X2[k1,k2] X3[k2,k3] \ldots Xk[kn,j]\)
+   qui met en jeu k-1 indices pour régler la taille de chaque empan
+   [k \alpha ,k\beta]
+ - Comme il y a n(n-1)/2 cellules, la complexité est \(O(n^2 *
+   n^(k-1))\), c'est à dire \(O(n^(k+1))\) où k est la longueur maximum
+   d'une partie droite des règles /[A COMPLETER]/
+
+/Je laisse tomber, ce prof reste pas sur ses putains de cours/
+
+*** Reformulation de CYK
+
+L'algorithme peut se reformuler sous la forme de trois règles d'interférence de type
+
+\[\frac{premisse}{conclusion}\]
+
+**** Axiom:
+
+\[\frac{}{(A \to .\alpha , i, i)}  \exists A \to \alpha  \in  R\]
+
+
+**** Shift:
+
+\[ \frac{(A \to \alpha.\alpha\beta,i,j)}{(A \to \alpha a . \beta
+  ,i,j+1)} \alpha = \alpha j \]
+
+**** Reduce:
+
+\[ \frac{(A \to \alpha . B \beta ,i,j) (B \to  \delta  . ,j,k)}{(A \to \alpha
+  B . \beta,i,k)} \]
+
+L'item (A \to \alpha.\beta,i,j) représente un état de l'analyseur
+syntaxique tel que
+ - A \to \alpha\beta est une règle de la grammaire (\alpha et \beta
+   sont des séquences éventuellement vides de symboles et de lettres)
+ - La posiiton de . représente le fait que \alpha a été analysé mais
+   pas encore \beta
+ - [i,j] est l'intervalle des lettres qui couvrent \alpha (\alpha =>
+   \alpha i \ldots \alpha j)
+ - La règle 1 Axiom permet d'amorcer la reconnaissance de A sans
+   aucune contrainte (on fait systématiquement l'hypothèse que A sera
+   analysé pour toute règle A \to  \delta )
+ - La règle 2 Shift complète l'analyse de  \delta  par la lecture d'une
+   lettre
+ - La règle 3 Reduce complète l'analyse de  \delta  à l'aide d'un terme déjà
+   reconnu
+L'idée de cette reformulation est de créer la binarisation des règles
+de la grammaire CFG pour obtenir un algorithme dont la complexité en
+temps est $O(n^3)$
+
+
+** Analyse Earley
+
+Soit G une grammaire \( CFG (Z, N, R, S) \)
+
+**** Amorce
+
+\[ \frac{}{(S \to . \alpha , 0, 0)}  \exists S \to \alpha \]
+
+
+**** Cloture
+
+\[ \frac{(A \to \alpha . B \beta ,i,j)}{(B \to . \delta ,j,j)} \exists B \to  \delta \]
+
+**** Décalage
+
+\[ \frac{(A \to \alpha . a \beta ,i,j)}{(B \to \alpha a . \beta
+,i,j+1)} \alpha = j_{eme} lettre \]
+
+
+**** Réduction
+
+\[ \frac{(A \to \alpha . B \beta ,i,j) (B \to \delta .,j,k)}{(A \to
+\alpha B. \beta ,i,k)} \]
+
+
+*** Algo
+
+Algorithme de reconnaissance Earley
+ - Initialiser avec I0 = { (S' \to .S,0,0) }
+ - répéter pour i allant de 1 à k
+   + Pour tout (A \to \alpha.ai\beta,n,i-1) qui appartient à Ii-1
+     * Ajouter (A \to\alphaai.\beta,n,i) à Ii
+   + Appliquer les règles 1 et 2 sur Ii tant qu'elles ajoutent un item
+   + Si Ik contient l'item (S' \to S.0,k) alors la chaine a1 \ldots ak
+     est reconnue, sinon elle ne l'est pas
+
+Algorithme d'analyse Earley
+ - On ajoute à chaque item une liste de règles
+ - Un item se note à présent (A \to \alpha . \beta ,i,j,( \mu 1 \mu 2
+   \mu 3 \ldots \mu k)) où \mu n est une règle et l'on peut déduire de
+   \mu 1 \mu 2 \mu 3 \ldots \mu k une dérivation droite
+ - Initialiser avec I0 = { (S' \to .S,0,0,()) }, et faire en tous
+   points comme dans l'algorithme de reconnaissance
+ - Si l'item (S' \to .S,0,k,( \mu 1 \mu 2 \ldots )) appartient à Ik,
+   cela signifie que la chaine a1 \ldots ak est analysée et que la
+   liste ( \mu 1 \mu 2 \ldots ) correspond à une dérivation droite
+
+ - Soit un item (A \to \alpha.ai\beta,n,i-1,Φ) dans Ij, s'il existe
+   une règle B \to r, alors l'item (B \to .r,j,j,()) est ajouté à Ij
+ - Soit une séquence a1 \ldots am \ldots ai \ldots aj \ldots ak. Si un
+   item (A \to \alpha .,i,j,Ψ) [A COMPLETER]
