@@ -410,3 +410,37 @@ APPROXIMATION
 n >>> 100?
 Utiliser d'autres algorithmes qui ne donnent pas la valeur optimale
     Ex: Le point le plus proche
+
+Algo du plus proche voisin:
+	A chaque étape, on ajoute le point le plus proche du dernier point ajouté, puis on revient sur le point de départ.
+	Complexité: O(n²)
+	Algo glouton (greedy: algo qui prend a chaque étape le choix le plus judicieux, sans retour arrière (backtracking))
+		ex: Kruskal
+
+Problème du bin packing
+	Tetris: formes différentes avec des tailles différentes, volume limité
+	-> Optimisation de la place pour rentrer le plus d’objets possible
+
+
+PROBLEME D'OPTIMISATION
+
+Notations:
+	I:      Instance (le cas particulier) d’un problème Pi
+	OPT(I): Valeur optimale pour l’instance I
+	A(I):   Valeur pour l’algo I
+
+Définition:
+	Une α-approximation est un algo A polynomial (en temps) tel que ∀I∈Pi:
+		- A(I) ≤ α.OPT(I) pour une minimisation (chemin le plus court)
+		- A(I) ≥ α.OPT(I) pour une maximisation (bin packing)
+	α est le facteur d’approximation et α > 0
+
+L’algo glouton du TSP (“le plus proche voisin”) n’est pas une α-approximation
+Preuve non nécessaire mais une HEURISTIQUE l'est (= marche en pratique mais pas de garantie de la fiabilité ou du temps d'exécution)
+
+Plusieurs heuristiques (donc pas des α-approximation):
+	- 2-OPT (ou “flip”)
+	- Economie
+	- Glouton
+	- Insertion aléatoire
+	-> Toutes des optimisations locales
