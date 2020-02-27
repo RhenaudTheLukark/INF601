@@ -387,7 +387,82 @@ Théorème de Kleene
     On peut convertir d'une manière algorithmique une expression rationnelle en AF qui reconnait le même langage
     Vice-versa, on peut convertir de manière algorithmique un AF en expression rationnelle qui décrit le langage reconnu par l'AF
 
-< Cours du 20 Fevrier manquant >
+
+
+EXPRESSIONS -> AUTOMATES
+Intérêt : on peut manipuler les AF par des algorithmes de graphes.
+
+
+==> Algorithme de Thompson <==
+On peut construire pour chaque expression rationnelle un AF avec Ɛ-transition qui reconnaît le même langage que l'expression 
+
+-> Propriétés <-
+l'AF construit par l'algo de Thompson :
+- A un unique état initial sur lequel n'arrive aucune transition
+- A un unique état final duquel ne part aucune transition
+
+-> Algo récursif <-
+En supposant qu'on sait faire des automates qui reconnaissent les expressions e1 et e2, on en fait pour e1.e2, e1+e2 et e1*
+Algorithme de Thompson pour les langages rationnels "de base" :
+i) Ø :         ->(1)     (2)->       langage reconnu : Ø 
+ii) {Ɛ} :      ->(1)--Ɛ->(2)->       langage reconnu : {Ɛ} 
+iii) {a} :       ->(1)--a->(2)->       langage reconnu : {a} 
+
+=> A) L'Union
+On a A1 et A2 des AF tq L(A1) = e1 et L(A2) = e2  =>  L(A) = e1+e2
+A:
+
+        __________A1___________
+      /                         \
+        (i1) - - - - - - - (f1)
+        /                    \
+       Ɛ                      Ɛ
+      /                        \
+--->(i)                        (f)--->
+      \                        /
+       Ɛ                      Ɛ
+        \                    /   \
+        (i2) - - - - - - - (f2)   | A2
+                                 /
+
+=> B) Le produit
+On a A1 et A2 des AF tq L(A1) = e1 et L(A2) = e2  =>  L(A) = e1.e2
+A:
+      ______A1______         ______A2_____
+--->(i1) - - - - (f1)--Ɛ-->(i2) - - - - (f2)---->
+ 
+
+
+=> C) L'étoile (de la mort lol)
+On a A1 un AF tq L(A1) = e1  =>  L(A) = e1*
+A:
+      _________>____Ɛ_____>__________
+     /                               \
+--->(i)---Ɛ-->(i1) - - - - (f1)---Ɛ-->(f)--->
+                \____<__Ɛ__/
+
+
+-> Remarques <-
+- Les Ɛ-transitions peuvent ensuite être enlevée pour avoir des AF sans Ɛ-transition qui reconnaissent les mêmes langages
+- Les Ɛ-transitions ne sont pas initiales à ce stade, identifier les états initiaux et finaux sans précautions peut mener à des AF qui ne reconnaissent pas le langage recherché.
+
+-> Principal inconvénient de l'algo de Thompson <-
+Il introduit beaucoup d'Ɛ-transitions
+
+==> Algorithme de Glushkov <==
+Conversion des expressions rationnelles en AF sans Ɛ-transition.
+Input : une expression rationnelle
+
+I) On commence par renommer les lettres de l'expressions afin d'avoir des noms uniques : linéarisation.
+    ex: a(ab+b*)*b  ->  a1(a2b1+b2*)*b3
+II) Chaque état de l'AF correspondra à une nouvelle lettre.
+III) On rajoute un état supplémentaire, l'état Ɛ (ou 0), qui sera le seul état initial de l'AF.
+IV) Les transitions depuis l'état Ɛ vont aller vers les états ai dont les lettres peuvent commencer un mot du langage. (Ɛ)-->(ai)
+V) Il existe une transition de l'état ai vers bj (ai)--->(bj) si il existe un mot du langage qui contient le facteur "aibj".
+VI) Les transitions allant à un état quelconque sont étiquetées par la lettre de l'état respectif.
+VII) Les états finaux sont les états étiquetés par les lettres qui peuvent terminer un mot du langage.
+
+
 
 
 AUTOMATES -> EXPRESSIONS
