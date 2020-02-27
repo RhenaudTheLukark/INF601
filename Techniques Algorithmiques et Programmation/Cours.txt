@@ -439,8 +439,73 @@ L’algo glouton du TSP (“le plus proche voisin”) n’est pas une α-approxi
 Preuve non nécessaire mais une HEURISTIQUE l'est (= marche en pratique mais pas de garantie de la fiabilité ou du temps d'exécution)
 
 Plusieurs heuristiques (donc pas des α-approximation):
-	- 2-OPT (ou “flip”)
-	- Economie
-	- Glouton
-	- Insertion aléatoire
+	2-OPT (ou “flip”)
+	Economie
+	Glouton
+	Insertion aléatoire
 	-> Toutes des optimisations locales
+
+
+HEURISTIQUES VS. APPROXIMATIONS
+
+Approximation: Algorithme de complexité polynomiale définie par un facteur d'approximation α (constante)
+
+
+CAS DU TSP EUCLIDIEN
+
+1/Ɛ-approximation: Si Ɛ == 0.01, alors on a une 1.01-approximation
+Complexité en temps: n(logn)^(O(1/Ɛ√δ)^(δ-1)) << n² dans un espace euclidien de dimension δ
+
+
+UNE 2-APPROXIMATION
+
+Il suffit que d() vérifie n' inégalités triangulaires
+Basé sur le calcul d'un arbre couvrant de poids minimum
+
+ApproxMST(V, d)
+    Calculer un MST T sur le graphe complet créé à partir de V et d
+    La tournée est définie à partir d'un DFS de T
+
+Il faut montrer:
+    Complexité polynomiale
+    Facteur d'approximation ≤ 2
+
+Complexité:
+    Le graphe est un graphe complet: m = (n 2) = (n(n-1))/2 = Θ(n²) arêtes
+    Prim    => O(n²)     + DFS => O(n+m)
+    Kruskal => O(m*logn) + DFS => O(n+m)
+    Proposition 1: ApproxMST a une complexité O(n²)
+
+Facteur d'approximation:
+    (G, ω) graphe valué
+    Poids de G: ω(G) = ∑(uv∈E(G)) ω(uv)
+    Proposition 2: La longueur de la tournée optimale pour (V, d) est plus grande que le poids du MST T
+
+Soit C le cycle qui définit la tournée optimale
+OPT(V, d) = d(C) > d(C\{e}) = d(C) - d(e) avec e arête du cycle ≥ d(T) car T est le MST
+Proposition 3: ApproxMST(V, d) ≤ 2*d(T)
+
+Pi = le chemin de i à i+1 (modulo n) dans T
+L ≤ ∑(n-1)(i=0) d(Pi) = 2*d(T) car chaque arête uv de T appartient exactement à 2 chemins Pi,Pj
+Proposition: C'est une 2-approximation
+d(T) < OPT(V, d) ≤ ApproxMST(V, d) ≤ 2*d(T) ≤ 2*OPT(V, d)
+
+
+UNION-AND-FIND
+
+Pour implémenter Kruskal
+
+On veut une structure de données qui puisse:
+    - Stocker des éléments (sommets du graphe)
+    - Stocker des ensemble (composantes connexes)
+    - Fusionner deux ensembles
+    - Trouver l'ensemble contenant un élément
+
+Utilisation d'arbres
+
+
+Optimisations:
+    Fusion avec optimisation de rang: L'arbre le plus petit se raccroche à l'arbre le plus grand
+    Tout arbre de profondeur h possède au moins 2^h éléments
+    Compression de chemin: Attache un arbre fils à la racine du sommet
+    Avec toutes ces optimisations, la complexité est de O(n+m * a(m,n)) où a est la fonction inverse de Ackermann
