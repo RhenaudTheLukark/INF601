@@ -386,3 +386,77 @@ Exemple
 Théorème de Kleene
     On peut convertir d'une manière algorithmique une expression rationnelle en AF qui reconnait le même langage
     Vice-versa, on peut convertir de manière algorithmique un AF en expression rationnelle qui décrit le langage reconnu par l'AF
+
+< Cours du 20 Fevrier manquant >
+
+
+AUTOMATES -> EXPRESSIONS
+
+Il existe plusieurs algorithmes pour convertir un AF en expression:
+    Algorithmes de Brzozowski
+    Lemme d'Arden
+    etc
+
+Lemme d'Arden
+    Dean N Arden, 1961
+    Il permet de résoudre des équations dont les inconnues (et les constantes) sont des langages
+    Le lemme permet de calculer à partir d'un AF une expression rationnelle
+    Soit U et V deux lanages tel que Ɛ∉U,V
+    Alors le seul langage X tel que X = UX+V est U*V
+
+Exemple: Soit l'AF H = { A = { 0, 1 }, Q = { 1, 2, 3 }, I = { 1 }, F = { 1 }, 𝛿 = { (1, 0, 1), (1, 1, 2), (2, 1, 1), (2, 0, 3), (3, 1, 3), (3, 0, 2) } (VOIR ANNEXE [A COMPLETER])
+         Utiliser le lemme d'Arden pour trouver le langage reconnu par cet automate
+         Etat 0: X0 = 0X0 + 1X1 + Ɛ
+         Etat 1: X1 = 0X2 + 1X2
+         Etat 2: X2 = 0X2 + 2X1
+         (2) => X2 = 1* 0X1
+         (1) => X1 = 0 1* 0X1 + 1X0
+         Arden => X1 = (0 1* 0)* 1X0
+         (0) => X0 = 0X0 + 1 ((0 1* 0)* 1X0) + Ɛ
+                X0 = (0 + 1 (0 1* 0)* 1)X0 + Ɛ
+         Arden => X0 = (0 + 1 (0 1* 0)* 1)* Ɛ
+                X0 = (0 + 1 (0 1* 0)* 1)*
+         Le langage reconnu par l'AF est X0
+
+Preuve du lemme d'Ardun
+    X = UX+V <==> X = U*V
+        <= UX+V = U(U*V) + V
+                = (UU* + Ɛ) V
+                = U*V = X
+        => Pour montrer que X = U*V on doit montrer:
+            U*V ⊆ X
+                X = UX+V => V ⊆ X (a) et UX ⊆ X (b)
+                On doit montrer que U*V ⊆ X c'est à dire Hn = U^nV ⊆ X ∀n≥0
+                On montre cela par récurrence sur n
+                H0: U^0V = ƐV = V ⊆ X (d'après a)
+                Hn -> Hn+1: Soit U^nV ⊆ X alors U^(n+1)V ⊆ X
+                    U^(n+1)V = U(U^nV)
+                             ⊆ UX (d'après Hn)
+                             ⊆ X  (d'après b)
+                Vrai
+            X ⊆ U*V
+                On suppose qu'il existe x∈X tel que x∉U*V
+                On choisit X de longueur minimale
+                x∈X = UX+V
+                -> Soit x∈V: alors x∈U*V => Contradiction
+                -> Soit x∈UX:
+                    x = ux', u∈U et x'∈X
+                    Ɛ∉U => u≠Ɛ => |u|≥1 => |x'|<|x|
+                    x'∈U*V => x = ux'∈UU*V = U*V => Contradiction
+                Vrai par contradiction
+
+Exemple: Soit l'AF H = { A = { 0, 1 }, Q = { 1, 2 }, I = { 1 }, F = { 1 }, 𝛿 = { (1, 1, 1), (1, 0, 2), (2, 0, 1), (2, 1, 2) } (VOIR ANNEXE [A COMPLETER])
+         Utiliser le lemme d'Arden pour trouver le langage reconnu par l'AF
+         Etat 1: 0X2 + 1X1 + Ɛ
+         Etat 2: 0X1 + 1X2
+         (2) => X2 = 1* 0X1
+         (1) => X1 = 1X1 + 0 1* 0X1
+                X1 = (1 + 0 1* 0)X1
+         Arden => X1 = (1 + 0 1* 0)*Ɛ
+                X1 = (1 + 0 1* 0)*
+         Le langage reconnu par l'AF est X1
+
+
+RESIDUELS
+
+Définition: On appelle un résiduel (ou quotient à gauche) d'un langage LcA* par rapport à un mot u∈A* le langage u^-1L = L/u = { v∈A* | uv∈L }
