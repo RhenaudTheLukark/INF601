@@ -534,5 +534,5 @@ Exemple: Soit l'AF H = { A = { 0, 1 }, Q = { 1, 2 }, I = { 1 }, F = { 1 }, 𝛿 
 
 RESIDUELS
 
-Définition: On appelle un résiduel (ou quotient à gauche) d'un langage LcΣ* par rapport à un mot u∈Σ* le langage u^-1L = L/u = { v∈Σ* | uv∈L }
+Définition: On appelle un résiduel (ou quotient à gauche) d'un langage LcA* par rapport à un mot u∈A* le langage u^-1L = L/u = { v∈A* | uv∈L }
 Bref c'est l’ensemble des mots de L qui commencent par u auxquels on a retiré ce préfixe u.
