@@ -482,8 +482,8 @@ Lemme d'Arden
 Exemple: Soit l'AF H = { A = { 0, 1 }, Q = { 1, 2, 3 }, I = { 1 }, F = { 1 }, 𝛿 = { (1, 0, 1), (1, 1, 2), (2, 1, 1), (2, 0, 3), (3, 1, 3), (3, 0, 2) } (VOIR ANNEXE [A COMPLETER])
          Utiliser le lemme d'Arden pour trouver le langage reconnu par cet automate
          Etat 0: X0 = 0X0 + 1X1 + Ɛ
-         Etat 1: X1 = 0X2 + 1X2
-         Etat 2: X2 = 0X2 + 2X1
+         Etat 1: X1 = 0X2 + 1X0
+         Etat 2: X2 = 0X1 + 1X2
          (2) => X2 = 1* 0X1
          (1) => X1 = 0 1* 0X1 + 1X0
          Arden => X1 = (0 1* 0)* 1X0
@@ -518,7 +518,7 @@ Preuve du lemme d'Ardun
                     x = ux', u∈U et x'∈X
                     Ɛ∉U => u≠Ɛ => |u|≥1 => |x'|<|x|
                     x'∈U*V => x = ux'∈UU*V = U*V => Contradiction
-                Vrai par contradiction
+                Vrai par l'absurde
 
 Exemple: Soit l'AF H = { A = { 0, 1 }, Q = { 1, 2 }, I = { 1 }, F = { 1 }, 𝛿 = { (1, 1, 1), (1, 0, 2), (2, 0, 1), (2, 1, 2) } (VOIR ANNEXE [A COMPLETER])
          Utiliser le lemme d'Arden pour trouver le langage reconnu par l'AF
@@ -534,4 +534,5 @@ Exemple: Soit l'AF H = { A = { 0, 1 }, Q = { 1, 2 }, I = { 1 }, F = { 1 }, 𝛿 
 
 RESIDUELS
 
-Définition: On appelle un résiduel (ou quotient à gauche) d'un langage LcA* par rapport à un mot u∈A* le langage u^-1L = L/u = { v∈A* | uv∈L }
+Définition: On appelle un résiduel (ou quotient à gauche) d'un langage LcΣ* par rapport à un mot u∈Σ* le langage u^-1L = L/u = { v∈Σ* | uv∈L }
+Bref c'est l’ensemble des mots de L qui commencent par u auxquels on a retiré ce préfixe u.
